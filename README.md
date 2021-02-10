@@ -27,10 +27,10 @@ Happy Mining Monitoring! :heart:
 
 ## Donate
 
-Feel free to donate a few satoshis to my Lightning Network wallet here :smile:
+Feel free to donate a few satoshis to my BTC wallet here (Lightning wallet blew up, no more inbound capacity, contact me if you want to support/donate using lightning network) :smile:
 
-![image](https://user-images.githubusercontent.com/30659361/107547556-94791c00-6b9b-11eb-9e3d-b0ffc15828aa.png)
+![image](https://user-images.githubusercontent.com/30659361/107554113-7dd6c300-6ba3-11eb-88f7-13938432dc41.png)
 
 ```
-lnbc1pszg966pp5wj57dmypdzg625dn802wsh0z9x5zz3x5hp0lfww3a396yxzycjdsdqu2askcmr9wssx7e3q2dshgmmndp5scqzpgxqyz5vqsp50epnrke86vmxs6p8hwr779nwc0tv4ranar3t5wj03cr839w2q04q9qy9qsq76fehdkp3s8jgj5gzgyx5fxkvwjz82zpgy3trympmtk7ua8fy8f5x0pkuc23z6vz9qgyt0r07s7kfl58zjrqalklsy6p607yjh7hcngp5t3sja
+bitcoin:bc1qwrvlj3q5zkvu9qeuy0utzgau4sa6sey5nn3nc4
 ```
