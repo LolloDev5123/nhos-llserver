@@ -13,7 +13,7 @@ How to get the script running on NHOS:
 - Actions menu: Reboot, Update Logs Now and Setup refresh rate in seconds.
 - Logs view: shows tail òutput from temps, miner and nhos logs `tail /var/log/nhos/nhm/miners/*.log /var/log/nhos/*.log`
 
-![image](https://user-images.githubusercontent.com/3067335/107544596-647c4980-6b98-11eb-87f1-49c21a35c829.png)
+![image](https://user-images.githubusercontent.com/30659361/107549678-1ff3ac80-6b9e-11eb-85d3-3369c9888c4d.png)
 
 For more information about NHOS check: https://static.nicehash.com/marketing%2Fnhos-guide-en.pdf
 
