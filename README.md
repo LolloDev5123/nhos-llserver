@@ -19,7 +19,7 @@ For more information about NHOS check: https://static.nicehash.com/marketing%2Fn
 
 ## Roadmap
 
-- Add full local monitoring using mioners APIs :rocket:
+- Add full local monitoring using miners APIs :rocket:
 - Add nice CSS stylesheets :sparkles:
 - Keep it simple in the process :100:
 
@@ -27,6 +27,6 @@ For more information about NHOS check: https://static.nicehash.com/marketing%2Fn
 
 Feel free to donate a few Satoshis using your Lighning Wallet ⚡ :smile:
 
-[![sathoshis](https://img.shields.io/badge/Donate-Satohis%20%E2%9A%A1-blueviolet)](https://totakaro.github.io/donate)
+[![sathoshis](https://img.shields.io/badge/Donate-Satoshi%20%E2%9A%A1-blueviolet)](https://totakaro.github.io/donate)
 
 Happy Mining Monitoring! :heart:
