@@ -17,7 +17,7 @@ How to get the script running on NHOS:
 
 For more information about NHOS check: https://static.nicehash.com/marketing%2Fnhos-guide-en.pdf
 
-# Roadmap
+## Roadmap
 
 - Add full local monitoring using mioners APIs :rocket:
 - Add nice CSS stylesheets :sparkles:
