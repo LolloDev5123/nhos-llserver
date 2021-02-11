@@ -25,7 +25,7 @@ For more information about NHOS check: https://static.nicehash.com/marketing%2Fn
 
 ## Donate
 
-Feel free to donate a few Satoshis using your Lighning Wallet ⚡ :smile:
+Feel free to donate a few Satoshi using your Lighning Wallet ⚡ :smile:
 
 [![sathoshis](https://img.shields.io/badge/Donate-Satoshi%20%E2%9A%A1-blueviolet)](https://totakaro.github.io/donate)
 
