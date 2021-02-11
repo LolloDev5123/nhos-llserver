@@ -23,14 +23,10 @@ For more information about NHOS check: https://static.nicehash.com/marketing%2Fn
 - Add nice CSS stylesheets :sparkles:
 - Keep it simple in the process :100:
 
-Happy Mining Monitoring! :heart:
-
 ## Donate
 
-Feel free to donate a few satoshis to my BTC wallet here (Lightning wallet blew up, no more inbound capacity, contact me if you want to support/donate using lightning network) :smile:
+Feel free to donate a few Satoshis using your Lighning Wallet ⚡ :smile:
 
-![image](https://user-images.githubusercontent.com/30659361/107554113-7dd6c300-6ba3-11eb-88f7-13938432dc41.png)
+[![sathoshis](https://img.shields.io/badge/Donate-Satohis%20%E2%9A%A1-blueviolet)](https://totakaro.github.io/donate)
 
-```
-bitcoin:bc1qwrvlj3q5zkvu9qeuy0utzgau4sa6sey5nn3nc4
-```
+Happy Mining Monitoring! :heart:
