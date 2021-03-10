@@ -135,7 +135,7 @@ read -r -d '' INDEX <<-HTML
     var setup = document.getElementById("setup")
     var dots; // Loading dots
 
-    // Polyfill if no AnsiUp 3th party available
+    // Polyfill if no AnsiUp 3rd party available
     if (typeof AnsiUp === "undefined") {
       function AnsiUp() {}
       // Remove color tags because no AnsiUp available
@@ -146,7 +146,7 @@ read -r -d '' INDEX <<-HTML
       color.checked = false
       color.addEventListener("click", function(e) {
         e.preventDefault()
-        alert("This feature requires the 3th party library ansi_up.js")
+        alert("This feature requires the 3rd party library ansi_up.js")
       })
     }
 
