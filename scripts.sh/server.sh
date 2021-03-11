@@ -353,7 +353,7 @@ read -r -d '' INDEX <<-HTML
 </body>
 </html>
 HTML
-# sss server
+# sse server
 ncat -n4 -lk -p 8081 --allow $ALLOW --sh-exec "echo -e 'HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-type: text/event-stream\r\n'; tail -f /var/log/nhos/nhm/miners/*.log /var/log/nhos/*.log 2>/dev/null | sed -e 's/^/data: /;s/$/\n/'"&
 # main server
 ncat -n4 -lk -p 80 --allow $ALLOW --sh-exec "echo -e 'HTTP/1.1 200 OK\r\nContent-type: text/html; charset=utf-8\r\nCache-Control: no-cache\r\nX-Content-Type-Options: nosniff\r\n'; echo '$INDEX'"&
