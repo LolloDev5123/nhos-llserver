@@ -110,7 +110,7 @@ read -r -d '' INDEX <<-HTML
 </head>
 
 <body>
-  <div id="tools"><h1>NHOS Local Log Server <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases">v1.0.3</a></small></sup></h1> | <button id="top">Go Top</button> | <button id="bottom">Go Bottom</button> | <button id="clear">Clear tab logs</button> | <button id="reboot">Reboot rig</button> | <button id="oc">OC Settings</button> <button id="oc-save">Save OC</button> | <label for="autoscroll">AutoScroll?</label> <input type="checkbox" name="autoscroll" id="autoscroll" checked=""> | <label for="color">Color?</label> <input type="checkbox" name="color" id="color" checked=""></div>
+  <div id="tools"><h1>NHOS Local Log Server <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank">v1.0.4</a></small></sup></h1> | <button id="top">Go Top</button> | <button id="bottom">Go Bottom</button> | <button id="clear">Clear tab logs</button> | <button id="reboot">Reboot rig</button> | <button id="oc">OC Settings</button> <button id="oc-save">Save OC</button> | <label for="autoscroll">AutoScroll?</label> <input type="checkbox" name="autoscroll" id="autoscroll" checked=""> | <label for="color">Color?</label> <input type="checkbox" name="color" id="color" checked=""></div>
   <div id="info">Basic Rig Infomation</div>
   <pre id="rig"></pre>
   <label for="oc-settings" id="oc-title">OC Settings</label>
@@ -358,13 +358,13 @@ ncat -n4 -lk -p 8081 --allow $ALLOW --sh-exec "echo -e 'HTTP/1.1 200 OK\r\nAcces
 # main server
 ncat -n4 -lk -p 80 --allow $ALLOW --sh-exec "echo -e 'HTTP/1.1 200 OK\r\nContent-type: text/html; charset=utf-8\r\nCache-Control: no-cache\r\nX-Content-Type-Options: nosniff\r\n'; echo '$INDEX'"&
 # actions server
-response="ok"
+response='{"status": "ok"}'
 while sleep 1; do
-  echo -e "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST\r\n\r\n$response" | nc -l -p 8082 > /tmp/actions.log
+  echo -e "HTTP/1.1 200 OK\r\nContent-type: application/json\r\nCache-Control: no-cache\r\nX-Content-Type-Options: nosniff\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST\r\n\r\n$response" | nc -l -p 8082 > /tmp/actions.log
   cat /tmp/actions.log | grep -q "POST /reboot"
   if [ $? -eq 0 ]; then
     # echo "put reboot"
-    response="reboot"
+    response='{"status": "reboot"}'
     sudo reboot
   fi
   cat /tmp/actions.log | grep -q "GET /oc"
@@ -373,7 +373,7 @@ while sleep 1; do
     if [ -f "/mnt/nhos/nhm/configs/device_settings.json" ]; then
       response=`cat /mnt/nhos/nhm/configs/device_settings.json`
     else
-      response="{}"
+      response='{"status": "device_settings.json not found"}'
     fi
   fi
   cat /tmp/actions.log | grep -q "POST /oc"
