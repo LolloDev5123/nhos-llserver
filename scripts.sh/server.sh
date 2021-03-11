@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# NHOS Local Log Server
+# By @totakaro 2021
+# MIT License
+
 # Edit your IP or IP range here check https://nmap.org/ncat/guide/ncat-access.html
 ALLOW="192.168.0.0/24"
 
@@ -106,7 +110,7 @@ read -r -d '' INDEX <<-HTML
 </head>
 
 <body>
-  <div id="tools"><h1>NHOS Local Log Server <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases">v1.0.1</a></small></sup></h1> | <button id="top">Go Top</button> | <button id="bottom">Go Bottom</button> | <button id="clear">Clear tab logs</button> | <button id="reboot">Reboot rig</button> | <button id="oc">OC Settings</button> <button id="oc-save">Save OC</button> | <label for="autoscroll">AutoScroll?</label> <input type="checkbox" name="autoscroll" id="autoscroll" checked=""> | <label for="color">Color?</label> <input type="checkbox" name="color" id="color" checked=""></div>
+  <div id="tools"><h1>NHOS Local Log Server <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases">v1.0.2</a></small></sup></h1> | <button id="top">Go Top</button> | <button id="bottom">Go Bottom</button> | <button id="clear">Clear tab logs</button> | <button id="reboot">Reboot rig</button> | <button id="oc">OC Settings</button> <button id="oc-save">Save OC</button> | <label for="autoscroll">AutoScroll?</label> <input type="checkbox" name="autoscroll" id="autoscroll" checked=""> | <label for="color">Color?</label> <input type="checkbox" name="color" id="color" checked=""></div>
   <div id="info">Basic Rig Infomation</div>
   <pre id="rig"></pre>
   <label for="oc-settings" id="oc-title">OC Settings</label>
