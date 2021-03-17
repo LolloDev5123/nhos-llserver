@@ -422,7 +422,6 @@ cat <<-HTML > /tmp/index.html
         })
       }
 
-
       // Move to top_
       top_.addEventListener("click", function () {
         window.scrollTo(0, 0)
