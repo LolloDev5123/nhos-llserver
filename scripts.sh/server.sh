@@ -4,7 +4,7 @@
 # By @totakaro 2021
 # MIT License
 
-# Edit your IP or IP range allowed to access this server here, also see https://nmap.org/ncat/guide/ncat-access.html
+# Edit your IP or IP range allowed to access this server here, alsp see https://nmap.org/ncat/guide/ncat-access.html
 ALLOW="192.168.0.0/24"
 
 # Check if NHOS logs are available to generate index.html
@@ -16,7 +16,9 @@ cat <<-HTML > /tmp/index.html
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAYAQMAAAA1e8SFAAAAA1BMVEX7o0IDE259AAAAC0lEQVQI12MYIAAAAHgAAUPP7CoAAAAASUVORK5CYII=" type="image/x-icon">
+    <link rel="shortcut icon"
+      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAYAQMAAAA1e8SFAAAAA1BMVEX7o0IDE259AAAAC0lEQVQI12MYIAAAAHgAAUPP7CoAAAAASUVORK5CYII="
+      type="image/x-icon">
     <title>NHOS Local Log Server</title>
     <style>
       #logs span,
@@ -58,6 +60,7 @@ cat <<-HTML > /tmp/index.html
         padding: 10px;
         box-sizing: border-box;
         border-top: 3px #fba342 solid;
+        z-index: 1;
       }
 
       #oc-settings {
@@ -123,20 +126,79 @@ cat <<-HTML > /tmp/index.html
         border: 0;
         color: #151515;
       }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 30px;
+        height: 16px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 8px;
+        width: 9px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+
+      input:checked + .slider {
+        background-color: #fba342 ;
+      }
+
+      input:focus + .slider {
+        box-shadow: 0 0 1px #fba342;
+      }
+
+      input:checked + .slider:before {
+        -webkit-transform: translateX(14px);
+        -ms-transform: translateX(14px);
+        transform: translateX(14px);
+      }
+
+      .slider.round {
+        border-radius: 34px;
+      }
+
+      .slider.round:before {
+        border-radius: 50%;
+      }
     </style>
   </head>
 
   <body>
     <div id="tools">
       <h1>NHOS Local Log Server <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank"
-              id="version">v1.0.5</a></small></sup></h1> | 
-      <button id="top">Go Top</button> | 
-      <button id="bottom">Go Bottom</button> | 
-      <button id="clear">Clear tab logs</button> | 
-      <button id="reboot">Reboot rig</button> | 
-      <button id="oc">OC Settings</button> <button id="oc-save">Save OC</button> | 
+              id="version">v1.0.6b</a></small></sup></h1> |
+      <button id="top">Go Top</button> |
+      <button id="bottom">Go Bottom</button> |
+      <button id="clear">Clear tab logs</button> |
+      <button id="reboot">Reboot rig</button> |
+      <button id="oc">OC Settings</button> <button id="oc-save">Save OC</button> |
       <label for="autoscroll">AutoScroll?</label>
-      <input type="checkbox" name="autoscroll" id="autoscroll" checked=""> | 
+      <input type="checkbox" name="autoscroll" id="autoscroll" checked=""> |
       <label for="color">Color?</label> <input type="checkbox" name="color" id="color" checked="">
     </div>
     <div id="info">Basic Rig Infomation</div>
@@ -170,7 +232,7 @@ cat <<-HTML > /tmp/index.html
       var top_ = document.getElementById("top")
       var tools = document.getElementById("tools")
       var version = document.getElementById("version")
-      
+
 
       // Polyfill if no AnsiUp 3rd party available
       if (typeof AnsiUp === "undefined") {
@@ -208,12 +270,15 @@ cat <<-HTML > /tmp/index.html
           setup.insertAdjacentText("beforeend", "No devices found, wait for NHOS to generate device_settings.json and try reopen OC settings again.")
           return
         }
+        let counter = 0
         json["detected_devices"].forEach(function (device) {
           setup.insertAdjacentText("beforeend", "Device: " + device["name"] + " " + device["device_id"])
           setup.insertAdjacentHTML("beforeend", "<br>")
           device["algorithms"].forEach(function (algo) {
+            counter++
             setup.insertAdjacentHTML("beforeend", "Miner: " + algo["miner"] + " on power modes low, medium and high")
-            setup.insertAdjacentHTML("beforeend", "<br>")
+            setup.insertAdjacentHTML("beforeend", "| All same? <label class=\"switch\"><input type=\"checkbox\" id=\"checkbox" + counter + "\" class=\"samecheck\"><span class=\"slider round\"></span></label><br>")
+            let checkbox = document.getElementById("checkbox" + counter)
             algo["power"].forEach(function (mode) {
               let label0, label1, label2, range0, range1, range2, number0, number1, number2
               label0 = document.createElement("label")
@@ -258,6 +323,20 @@ cat <<-HTML > /tmp/index.html
               number0.value = range0.value
               number1.value = range1.value
               number2.value = range2.value
+              if (mode["mode"] !== "low") {
+                range0.classList.add("not-low-" + counter)
+                range1.classList.add("not-low-" + counter)
+                range2.classList.add("not-low-" + counter)
+                number0.classList.add("not-low-" + counter)
+                number1.classList.add("not-low-" + counter)
+                number2.classList.add("not-low-" + counter)
+                range0.classList.add("tdp-" + counter)
+                number0.classList.add("tdp-" + counter)
+                range1.classList.add("core-clocks-" + counter)
+                number1.classList.add("core-clocks-" + counter)
+                range2.classList.add("memory-clocks-" + counter)
+                number2.classList.add("memory-clocks-" + counter)
+              }
               setup.appendChild(label0)
               setup.appendChild(number0)
               setup.appendChild(range0)
@@ -268,40 +347,83 @@ cat <<-HTML > /tmp/index.html
               setup.appendChild(number2)
               setup.appendChild(range2)
               setup.insertAdjacentHTML("beforeend", "<br>")
-              range0.addEventListener("input", function (e) {
-                number0.value = range0.value
-                mode["tdp"] = parseInt(range0.value)
+
+              let updateJson = function(currentEl, bindElement, inputType, selector) {
+                bindElement.value = currentEl.value
+                mode[inputType] = parseInt(currentEl.value)
                 element.value = JSON.stringify(json, null, "\t")
-              })
-              range1.addEventListener("input", function (e) {
-                number1.value = range1.value
-                mode["core_clocks"] = parseInt(range1.value)
-                element.value = JSON.stringify(json, null, "\t")
-              })
-              range2.addEventListener("input", function (e) {
-                number2.value = range2.value
-                mode["memory_clocks"] = parseInt(range2.value)
-                element.value = JSON.stringify(json, null, "\t")
-              })
-              number0.addEventListener("input", function (e) {
-                range0.value = number0.value
-                mode["tdp"] = parseInt(number0.value) || 0
-                element.value = JSON.stringify(json, null, "\t")
-              })
-              number1.addEventListener("input", function (e) {
-                range1.value = number1.value
-                mode["core_clocks"] = parseInt(number1.value) || 0
-                element.value = JSON.stringify(json, null, "\t")
-              })
-              number2.addEventListener("input", function (e) {
-                range2.value = number2.value
-                mode["memory_clocks"] = parseInt(number2.value) || 0
-                element.value = JSON.stringify(json, null, "\t")
+                if (mode["mode"] === "low" && checkbox.checked) {
+                  document.querySelectorAll(selector).forEach(function(sel) {
+                    sel.value = currentEl.value
+                    //sel.trigger(inputType, sel.value)
+                    sel.dispatchEvent(new CustomEvent("update", { bubbles: true, detail: { inputType: inputType, value: sel.value } }))
+                    element.value = JSON.stringify(json, null, "\t")
+                  })
+                }
+              }
+
+              let inputs = [range0, number0,  range1, number1, range2 , number2], inputCounter = 0
+              inputs.forEach(function (input) {
+                input.addEventListener("update", function(e) {
+                  mode[e.detail.inputType] = parseInt(e.detail.value)
+                })
+                let ic = ++inputCounter
+                let c = counter
+                input.addEventListener("input", function (e) {
+                  let index = (ic % 2 == 0) ? ic - 2 : ic
+                  let type, selector
+                  if (ic <= 2) {
+                    type = "tdp"
+                    selector = ".tdp-" + c
+                  } else if (ic <= 4) {
+                    type = "core_clocks"
+                    selector = ".core-clocks-" + c
+                  } else {
+                    type = "memory_clocks"
+                    selector = ".memory-clocks-" + c
+                  }
+                  updateJson(input, inputs[index], type, selector)
+                })
               })
             })
           })
         })
+        let checkBoxcounter = 0
+        let checkboxes = document.querySelectorAll(".samecheck")
+        checkboxes.forEach(function(checkbox) {
+          checkBoxcounter++
+          let notLow = document.querySelectorAll(".not-low-" + checkBoxcounter)
+          let value = localStorage.getItem("checkbox" + checkBoxcounter)
+          if (value !== "") {
+            checkbox.checked = (value === "true" ? true : false)
+          } else {
+            localStorage.setItem("checkbox" +  checkBoxcounter, checkbox.checked)
+          }
+          notLow.forEach(function(el) {
+            if (checkbox.checked) {
+              el.setAttribute("disabled", "disabled")
+            } else {
+              el.removeAttribute("disabled");
+            }
+          })
+        })
+        let eventCounter = 0
+        checkboxes.forEach(function(checkbox) {
+          let ec = ++eventCounter
+          let notLow = document.querySelectorAll(".not-low-" + ec)
+          checkbox.addEventListener("click", function () {
+            localStorage.setItem("checkbox" +  ec, checkbox.checked)
+            notLow.forEach(function(el) {
+              if (checkbox.checked) {
+                el.setAttribute("disabled", "disabled")
+              } else {
+                el.removeAttribute("disabled");
+              }
+            })
+          })
+        })
       }
+
 
       // Move to top_
       top_.addEventListener("click", function () {
