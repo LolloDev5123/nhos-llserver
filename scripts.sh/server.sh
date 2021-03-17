@@ -4,7 +4,7 @@
 # By @totakaro 2021
 # MIT License
 
-# Edit your IP or IP range allowed to access this server here, alsp see https://nmap.org/ncat/guide/ncat-access.html
+# Edit your IP or IP range allowed to access this server here, also see https://nmap.org/ncat/guide/ncat-access.html
 ALLOW="192.168.0.0/24"
 
 # Check if NHOS logs are available to generate index.html
@@ -16,9 +16,7 @@ cat <<-HTML > /tmp/index.html
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon"
-      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAYAQMAAAA1e8SFAAAAA1BMVEX7o0IDE259AAAAC0lEQVQI12MYIAAAAHgAAUPP7CoAAAAASUVORK5CYII="
-      type="image/x-icon">
+    <link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAYAQMAAAA1e8SFAAAAA1BMVEX7o0IDE259AAAAC0lEQVQI12MYIAAAAHgAAUPP7CoAAAAASUVORK5CYII=" type="image/x-icon">
     <title>NHOS Local Log Server</title>
     <style>
       #logs span,
