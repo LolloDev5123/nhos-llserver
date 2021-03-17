@@ -189,7 +189,7 @@ cat <<-HTML > /tmp/index.html
   <body>
     <div id="tools">
       <h1>NHOS Local Log Server <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank"
-              id="version">v1.0.6b</a></small></sup></h1> |
+              id="version">v1.0.6</a></small></sup></h1> |
       <button id="top">Go Top</button> |
       <button id="bottom">Go Bottom</button> |
       <button id="clear">Clear tab logs</button> |
