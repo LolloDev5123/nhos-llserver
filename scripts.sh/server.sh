@@ -189,14 +189,14 @@ cat <<-HTML > /tmp/index.html
   <body>
     <div id="tools">
       <h1>NHOS Local Log Server <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank"
-              id="version">v1.0.6</a></small></sup></h1> |
-      <button id="top">Go Top</button> |
-      <button id="bottom">Go Bottom</button> |
-      <button id="clear">Clear tab logs</button> |
-      <button id="reboot">Reboot rig</button> |
-      <button id="oc">OC Settings</button> <button id="oc-save">Save OC</button> |
+              id="version">v1.0.6</a></small></sup></h1> | 
+      <button id="top">Go Top</button> | 
+      <button id="bottom">Go Bottom</button> | 
+      <button id="clear">Clear tab logs</button> | 
+      <button id="reboot">Reboot rig</button> | 
+      <button id="oc">OC Settings</button> <button id="oc-save">Save OC</button> | 
       <label for="autoscroll">AutoScroll?</label>
-      <input type="checkbox" name="autoscroll" id="autoscroll" checked=""> |
+      <input type="checkbox" name="autoscroll" id="autoscroll" checked=""> | 
       <label for="color">Color?</label> <input type="checkbox" name="color" id="color" checked="">
     </div>
     <div id="info">Basic Rig Infomation</div>
