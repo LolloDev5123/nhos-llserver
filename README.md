@@ -44,7 +44,7 @@ Tool to setup your oc settings: TDP, CORE CLOCKS and MEMORY CLOCKS
 
 ![image](https://user-images.githubusercontent.com/30659361/110711499-aadfbb00-81cd-11eb-8621-1cad2a0a83dc.png)
 
-![image](https://user-images.githubusercontent.com/30659361/110710375-bcc05e80-81cb-11eb-96ea-f63a106a4c04.png)
+![image](https://user-images.githubusercontent.com/30659361/111409592-3f05c280-86a5-11eb-90fd-8db74a993ac4.png)
 
 ## Miners Logs
 
