@@ -231,6 +231,7 @@ cat <<-HTML > /tmp/index.html
       var tools = document.getElementById("tools")
       var version = document.getElementById("version")
 
+
       // Polyfill if no AnsiUp 3rd party available
       if (typeof AnsiUp === "undefined") {
         AnsiUp = function () { }
@@ -274,7 +275,7 @@ cat <<-HTML > /tmp/index.html
           device["algorithms"].forEach(function (algo) {
             counter++
             setup.insertAdjacentHTML("beforeend", "Miner: " + algo["miner"] + " on power modes low, medium and high")
-            setup.insertAdjacentHTML("beforeend", "| All same? <label class=\"switch\"><input type=\"checkbox\" id=\"checkbox" + counter + "\" class=\"samecheck\"><span class=\"slider round\"></span></label><br>")
+            setup.insertAdjacentHTML("beforeend", " | All same? <label class=\"switch\"><input type=\"checkbox\" id=\"checkbox" + counter + "\" class=\"samecheck\"><span class=\"slider round\"></span></label><br>")
             let checkbox = document.getElementById("checkbox" + counter)
             algo["power"].forEach(function (mode) {
               let label0, label1, label2, range0, range1, range2, number0, number1, number2
@@ -352,7 +353,6 @@ cat <<-HTML > /tmp/index.html
                 if (mode["mode"] === "low" && checkbox.checked) {
                   document.querySelectorAll(selector).forEach(function(sel) {
                     sel.value = currentEl.value
-                    //sel.trigger(inputType, sel.value)
                     sel.dispatchEvent(new CustomEvent("update", { bubbles: true, detail: { inputType: inputType, value: sel.value } }))
                     element.value = JSON.stringify(json, null, "\t")
                   })
