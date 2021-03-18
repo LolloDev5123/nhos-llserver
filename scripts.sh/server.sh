@@ -444,7 +444,13 @@ cat <<-HTML > /tmp/index.html
       reboot.addEventListener("click", function () {
         if (confirm("Are you sure to reboot your rig?")) {
           fetch("/reboot", { method: "POST" })
-            .then(function (response) { return response.text() }).then(function (text) { alert("Reboot request executed! " + text) }).catch(function (error) { alert("Error comunicating with local server, reboot probably in progress. " + error) })
+            .then(function (response) {
+              return response.text()
+            }).then(function (text) {
+              alert("Reboot request executed! " + text)
+            }).catch(function (error) {
+              alert("Error comunicating with local server, reboot probably in progress. " + error)
+            })
         }
       })
 
