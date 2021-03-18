@@ -231,7 +231,6 @@ cat <<-HTML > /tmp/index.html
       var tools = document.getElementById("tools")
       var version = document.getElementById("version")
 
-
       // Polyfill if no AnsiUp 3rd party available
       if (typeof AnsiUp === "undefined") {
         AnsiUp = function () { }
