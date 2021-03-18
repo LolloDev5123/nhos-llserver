@@ -71,7 +71,7 @@ cat <<-HTML > /tmp/index.html
         border: 0;
         box-sizing: border-box;
         border-radius: 0;
-        white-space: nowrap;
+        white-space: pre;
       }
 
       #oc-settings:focus {
