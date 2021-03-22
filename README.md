@@ -14,15 +14,15 @@ How to get the script running on NHOS:
 
 ## Features
 
-## Toolbar
+### Toolbar
 
 ![image](https://user-images.githubusercontent.com/30659361/111987413-38c87980-8add-11eb-9a0d-2bf65316d05a.png)
 
-## Multi rig
+### Multi rig
 
 ![image](https://user-images.githubusercontent.com/30659361/111988914-1d5e6e00-8adf-11eb-9ff4-ffff995974ac.png)
 
-## General configuration
+### General configuration
 
 ![image](https://user-images.githubusercontent.com/30659361/111988023-f2bfe580-8add-11eb-8963-0d60be8dd5b4.png)
 
@@ -32,7 +32,7 @@ Tool to setup your oc settings: TDP, CORE CLOCKS and MEMORY CLOCKS
 
 ![image](https://user-images.githubusercontent.com/30659361/111989646-0c622c80-8ae0-11eb-8f6c-5bfac1adced5.png)
 
-## Miners Logs
+### Miners Logs
 
 Shows miners logs in `/var/log/nhos/nhm/miners`
 
