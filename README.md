@@ -2,6 +2,8 @@
 
 Simple server in one single file to manage your NHOS rig :rocket:
 
+![image](https://user-images.githubusercontent.com/30659361/111986242-affd0e00-8adb-11eb-975a-6c3cbe1397e0.png)
+
 ## Instructions 
 
 How to get the script running on NHOS:
@@ -12,45 +14,29 @@ How to get the script running on NHOS:
 
 ## Features
 
-### Go Top / Go Bottom
+## Toolbar
 
-Buttons to navigate to the top and bottom of the logs
+![image](https://user-images.githubusercontent.com/30659361/111987413-38c87980-8add-11eb-9a0d-2bf65316d05a.png)
 
-![image](https://user-images.githubusercontent.com/30659361/110710803-833c2300-81cc-11eb-8277-2861c29fa3b3.png)
+## Multi rig local manager
 
-### Reboot rig
+![image](https://user-images.githubusercontent.com/30659361/111988914-1d5e6e00-8adf-11eb-9ff4-ffff995974ac.png)
 
-Button to reboot your rig 
+## Edit your configuration.txt (fan setup)
 
-![image](https://user-images.githubusercontent.com/30659361/110710940-ac5cb380-81cc-11eb-9eb4-4f514613cc8e.png)
-
-### AutoScroll?
-
-Option to auto scroll the logs
-
-![image](https://user-images.githubusercontent.com/30659361/110711167-12e1d180-81cd-11eb-88bc-93dc05aa9026.png)
-
-### Color?
-
-Option to show logs color (it uses 3rd party [AnsiUp.js](https://github.com/drudru/ansi_up) dependency)
-
-![image](https://user-images.githubusercontent.com/30659361/110711352-6a803d00-81cd-11eb-8ad5-3c77dbb4a4a9.png)
-
-![image](https://user-images.githubusercontent.com/30659361/110711381-77049580-81cd-11eb-90a0-ec93f25f23b5.png)
+![image](https://user-images.githubusercontent.com/30659361/111988023-f2bfe580-8add-11eb-8963-0d60be8dd5b4.png)
 
 ### OC Settings
 
 Tool to setup your oc settings: TDP, CORE CLOCKS and MEMORY CLOCKS
 
-![image](https://user-images.githubusercontent.com/30659361/110711499-aadfbb00-81cd-11eb-8621-1cad2a0a83dc.png)
-
-![image](https://user-images.githubusercontent.com/30659361/111409592-3f05c280-86a5-11eb-90fd-8db74a993ac4.png)
+![image](https://user-images.githubusercontent.com/30659361/111988473-885b7500-8ade-11eb-9110-8ebc37a896e5.png)
 
 ## Miners Logs
 
 Shows miners logs in `/var/log/nhos/nhm/miners`
 
-![image](https://user-images.githubusercontent.com/30659361/110711741-0e69e880-81ce-11eb-8b30-de1fda4b488c.png)
+![image](https://user-images.githubusercontent.com/30659361/111988739-dff9e080-8ade-11eb-891b-764788c99011.png)
 
 For more information about NHOS check official sources: https://static.nicehash.com/marketing%2Fnhos-guide-en.pdf and https://github.com/nicehash/NHOS
 
