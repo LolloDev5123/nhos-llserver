@@ -30,7 +30,7 @@ How to get the script running on NHOS:
 
 Tool to setup your oc settings: TDP, CORE CLOCKS and MEMORY CLOCKS
 
-![image](https://user-images.githubusercontent.com/30659361/111988473-885b7500-8ade-11eb-9110-8ebc37a896e5.png)
+![image](https://user-images.githubusercontent.com/30659361/111989646-0c622c80-8ae0-11eb-8f6c-5bfac1adced5.png)
 
 ## Miners Logs
 
