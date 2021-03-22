@@ -496,7 +496,7 @@ cat <<-'HTML' > /tmp/index.html
               range1.value = mode["core_clocks"]
               range2.value = mode["memory_clocks"]
               label0.textContent = "TDP "
-              label1.textContent = "CLOCK "
+              label1.textContent = "CORE "
               label2.textContent = "MEMORY "
               number0.value = range0.value
               number1.value = range1.value
