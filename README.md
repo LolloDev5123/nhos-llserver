@@ -36,7 +36,7 @@ Tool to setup your oc settings: TDP, CORE CLOCKS and MEMORY CLOCKS
 
 ### Miners Logs
 
-Shows miners logs in `/var/log/nhos/nhm/miners`
+Shows miners logs from `/var/log/nhos/nhm/miners/`
 
 ![image](https://user-images.githubusercontent.com/30659361/111988739-dff9e080-8ade-11eb-891b-764788c99011.png)
 
