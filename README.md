@@ -20,13 +20,13 @@ How to get the script running on NHOS:
 
 ### Multi rig
 
-![image](https://user-images.githubusercontent.com/30659361/111988914-1d5e6e00-8adf-11eb-9ff4-ffff995974ac.png)
+![image](https://user-images.githubusercontent.com/30659361/111991920-d5414a80-8ae2-11eb-948d-f50205851b7c.png)
 
 ### General configuration
 
 Fan settings and `configuration.txt`, also see https://github.com/nicehash/NHOS/blob/master/nhos_configuration.md
 
-![image](https://user-images.githubusercontent.com/30659361/111991198-0a996880-8ae2-11eb-9d5a-04ef9c15a548.png)
+![image](https://user-images.githubusercontent.com/30659361/111992100-07eb4300-8ae3-11eb-8436-f9ae5df592ad.png)
 
 ### OC Settings
 
