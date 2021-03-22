@@ -24,13 +24,15 @@ How to get the script running on NHOS:
 
 ### General configuration
 
-![image](https://user-images.githubusercontent.com/30659361/111988023-f2bfe580-8add-11eb-8963-0d60be8dd5b4.png)
+Fan settings and `configuration.txt`, also see https://github.com/nicehash/NHOS/blob/master/nhos_configuration.md
+
+![image](https://user-images.githubusercontent.com/30659361/111991198-0a996880-8ae2-11eb-9d5a-04ef9c15a548.png)
 
 ### OC Settings
 
 Tool to setup your oc settings: TDP, CORE CLOCKS and MEMORY CLOCKS
 
-![image](https://user-images.githubusercontent.com/30659361/111989646-0c622c80-8ae0-11eb-8f6c-5bfac1adced5.png)
+![image](https://user-images.githubusercontent.com/30659361/111990970-c7d79080-8ae1-11eb-9277-f98818712352.png)
 
 ### Miners Logs
 
