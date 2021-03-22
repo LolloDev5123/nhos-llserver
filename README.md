@@ -18,7 +18,7 @@ How to get the script running on NHOS:
 
 ![image](https://user-images.githubusercontent.com/30659361/111987413-38c87980-8add-11eb-9a0d-2bf65316d05a.png)
 
-## Multi rig local manager
+## Multi rig
 
 ![image](https://user-images.githubusercontent.com/30659361/111988914-1d5e6e00-8adf-11eb-9ff4-ffff995974ac.png)
 
