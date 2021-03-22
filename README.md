@@ -22,7 +22,7 @@ How to get the script running on NHOS:
 
 ![image](https://user-images.githubusercontent.com/30659361/111988914-1d5e6e00-8adf-11eb-9ff4-ffff995974ac.png)
 
-## Edit your configuration.txt (fan setup)
+## General configuration
 
 ![image](https://user-images.githubusercontent.com/30659361/111988023-f2bfe580-8add-11eb-8963-0d60be8dd5b4.png)
 
