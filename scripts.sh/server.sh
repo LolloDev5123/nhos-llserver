@@ -12,8 +12,17 @@ while sleep 1; do
 if [ -d "/var/log/nhos/nhm" ]; then
 head -1 /var/log/nhos/nhm/*.log > /tmp/nhm.txt
 head -2 /var/log/nhos/nhm/*.log | tail -1 >> /tmp/nhm.txt
+if [ -f /mnt/nhos/scripts.sh/rigs.json ]; then
+  # Check json file with jq https://stackoverflow.com/a/46955018
+  cat /mnt/nhos/scripts.sh/rigs.json | jq -e .
+  if [ $? -ne 0 ]; then
+    echo '{"list":[]}' > /mnt/nhos/scripts.sh/rigs.json
+  fi
+else
+  echo '{"list":[]}' > /mnt/nhos/scripts.sh/rigs.json
+fi
+# Makes device settings read only
 chmod -w /mnt/nhos/nhm/configs/device_settings.json
-echo '{"list":[]}' > /mnt/nhos/scripts.sh/rigs.json
 cat <<-'HTML' > /tmp/index.html
   <!DOCTYPE html>
   <html lang="en">
