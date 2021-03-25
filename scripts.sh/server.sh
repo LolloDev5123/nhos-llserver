@@ -12,13 +12,7 @@ while sleep 1; do
 if [ -d "/var/log/nhos/nhm" ]; then
 head -1 /var/log/nhos/nhm/*.log > /tmp/nhm.txt
 head -2 /var/log/nhos/nhm/*.log | tail -1 >> /tmp/nhm.txt
-if [ -f /mnt/nhos/scripts.sh/rigs.json ]; then
-  # Check json file with jq https://stackoverflow.com/a/46955018
-  cat /mnt/nhos/scripts.sh/rigs.json | jq -e .
-  if [ $? -ne 0 ]; then
-    echo '{"list":[]}' > /mnt/nhos/scripts.sh/rigs.json
-  fi
-else
+if [ ! -f /mnt/nhos/scripts.sh/rigs.json ]; then
   echo '{"list":[]}' > /mnt/nhos/scripts.sh/rigs.json
 fi
 # Makes device settings read only
@@ -618,9 +612,9 @@ cat <<-'HTML' > /tmp/index.html
         configGui.insertAdjacentText("beforeend", "Temperature - Speed %")
         configGui.insertAdjacentHTML("beforeend", "<br>")
         json["fan_control"].forEach(function (state) {
-          counter++
           let tmpc = document.createElement("input")
           let spdp = document.createElement("input")
+          let spdpmeter = document.createElement("input")
           tmpc.max = 100
           tmpc.min = 0
           tmpc.step = 1
@@ -631,15 +625,28 @@ cat <<-'HTML' > /tmp/index.html
           spdp.step = 1
           spdp.type = "number"
           spdp.value = state.spdp
+          spdpmeter.max = 100
+          spdpmeter.min = 0
+          spdpmeter.step = 1
+          spdpmeter.type = "range"
+          spdpmeter.value = state.spdp
           configGui.appendChild(tmpc)
-          configGui.insertAdjacentText("beforeend", "- ")
+          configGui.insertAdjacentText("beforeend", " - ")
           configGui.appendChild(spdp)
-          configGui.insertAdjacentHTML("beforeend", "State " + counter + "<br>")
+          configGui.appendChild(spdpmeter)
+          configGui.insertAdjacentHTML("beforeend", " State " + counter + "<br>")
+          counter++
           tmpc.addEventListener("input", function() {
             state.tmpc = parseInt(tmpc.value)
             element.value = JSON.stringify(json, null, "    ")
           })
           spdp.addEventListener("input", function() {
+            spdpmeter.value = spdp.value
+            state.spdp = parseInt(spdp.value)
+            element.value = JSON.stringify(json, null, "    ")
+          })
+          spdpmeter.addEventListener("input", function() {
+            spdp.value = spdpmeter.value
             state.spdp = parseInt(spdp.value)
             element.value = JSON.stringify(json, null, "    ")
           })
@@ -686,7 +693,7 @@ cat <<-'HTML' > /tmp/index.html
           alert("Error in your configuration.txt, please check again: " + err)
           return
         }
-        if (!confirm("Please backup your configuration.txt before save them. Are you sure to continue?")) {
+        if (!confirm("Please backup your configuration.txt before save them.\nAre you sure to continue?")) {
           return
         }
         fetch(rig.url + "/configuration.txt", { method: "POST", body: configTxt.value + "\n" })
@@ -694,12 +701,10 @@ cat <<-'HTML' > /tmp/index.html
             return response.text()
           })
           .then(function (text) {
-            if (confirm("Settings saved successfully! Wanna reboot to apply changes?")) {
-              reboot.click()
-            }
+            alert("Settings saved and some settings applied successfully!\nYou may need to reboot to apply remaining changes.")
           })
           .catch(function (error) {
-            alert("Error saving configuration.txt in local server, reboot probably in progress " + error)
+            alert("Error saving configuration.txt in local server, reboot probably in progress. " + error)
           })
       })
 
@@ -741,7 +746,7 @@ cat <<-'HTML' > /tmp/index.html
       // Show or Close OC Settings
       oc.addEventListener("click", function () {
         if (ocSettings.style.display === "none") {
-          if (!confirm("CAUTION: OC can damage your hardware, edit only if you know what you are doing! Do you wanna continue?")) {
+          if (!confirm("CAUTION:\nOC can damage your hardware!\nEdit only if you know what you are doing!\nDo you wanna continue?")) {
             return
           }
           fetch(rig.url + "/device_settings.json")
@@ -781,7 +786,7 @@ cat <<-'HTML' > /tmp/index.html
           alert("Error in your OC Settings, please check again: " + err)
           return
         }
-        if (!confirm("Please backup your OC settings before save them. Are you sure to continue?")) {
+        if (!confirm("Please backup your OC settings before save them.\nAre you sure to continue?")) {
           return
         }
         fetch(rig.url + "/device_settings.json", { method: "POST", body: ocSettings.value + "\n" })
@@ -789,12 +794,10 @@ cat <<-'HTML' > /tmp/index.html
             return response.text()
           })
           .then(function (text) {
-            if (confirm("Settings saved successfully! Wanna reboot to apply changes?")) {
-              reboot.click()
-            }
+            alert("Settings saved and applied successfully!\nif you do not see any changes please reload this page.")
           })
           .catch(function (error) {
-            alert("Error saving OC settings in local server, reboot probably in progress " + error)
+            alert("Error saving OC settings in local server. " + error)
           })
       })
 
@@ -1495,7 +1498,7 @@ cat <<-'LUA' > /tmp/httpd.lua
     if resource == "/device_settings.json" then
         resource = "/mnt/nhos/nhm/configs/device_settings.json"
         while true do
-          input = read_line()
+          input = read_line() or ""
           --debug("Input: " .. input)
           if string.find(input, "^{") or buffer ~= "" then
              buffer = buffer .. input .. "\n"
@@ -1507,7 +1510,7 @@ cat <<-'LUA' > /tmp/httpd.lua
     elseif resource == "/rigs.json" then
         resource = "/mnt/nhos/scripts.sh/rigs.json"
         while true do
-          input = read_line()
+          input = read_line() or ""
           --debug("Input: " .. input)
           if string.find(input, "^{") or buffer ~= "" then
              buffer = buffer .. input .. "\n"
@@ -1519,7 +1522,7 @@ cat <<-'LUA' > /tmp/httpd.lua
     elseif resource == "/configuration.txt" then
         resource = "/mnt/nhos/configuration.txt"
         while true do
-          input = read_line()
+          input = read_line() or ""
           --debug("Input: " .. input)
           if string.find(input, "^{") or buffer ~= "" then
              buffer = buffer .. input .. "\n"
@@ -1592,6 +1595,15 @@ cat <<-'LUA' > /tmp/httpd.lua
       os.execute("chmod +w "..resource)
       f:write(buffer)
       os.execute("chmod -w "..resource)
+      if resource == "/mnt/nhos/nhm/configs/device_settings.json" then
+        os.execute("sudo killall nhm3 && sudo /opt/nhos/nhm_start&")
+      elseif resource == "/mnt/nhos/configuration.txt" then
+        os.execute("sudo killall nhos_gpu_fan_control && sudo /opt/nhos/nhos_gpu_fan_control&")
+      end
+      make_response({
+          ["data"] = "ok",
+          ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
+      })
   end
 
   --and output it all.
