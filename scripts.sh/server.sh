@@ -693,7 +693,7 @@ cat <<-'HTML' > /tmp/index.html
           alert("Error in your configuration.txt, please check again: " + err)
           return
         }
-        if (!confirm("Please backup your configuration.txt before save them.\nAre you sure to continue?")) {
+        if (!confirm("Please backup your configuration before save it.\nAre you sure to continue?")) {
           return
         }
         fetch(rig.url + "/configuration.txt", { method: "POST", body: configTxt.value + "\n" })
@@ -701,7 +701,7 @@ cat <<-'HTML' > /tmp/index.html
             return response.text()
           })
           .then(function (text) {
-            alert("Settings saved and some settings applied successfully!\nYou may need to reboot to apply remaining changes.")
+            alert("Configuration saved successfully! New Fan control executed! You may need to reboot to apply remaining changes.")
           })
           .catch(function (error) {
             alert("Error saving configuration.txt in local server, reboot probably in progress. " + error)
@@ -794,7 +794,8 @@ cat <<-'HTML' > /tmp/index.html
             return response.text()
           })
           .then(function (text) {
-            alert("Settings saved and applied successfully!\nif you do not see any changes please reload this page.")
+            setTimeout(rigOpenSetup, 5000)
+            alert("OC Settings saved successfully!")
           })
           .catch(function (error) {
             alert("Error saving OC settings in local server. " + error)
@@ -840,6 +841,18 @@ cat <<-'HTML' > /tmp/index.html
         config.style.display = "inline-block"
         oc.textContent = "OC Settings"
         oc.style.display = "inline-block"
+        ocSave.style.display = "none"
+        ocSettingsGui.textContent = ""
+        ocSettingsGui.style.display = "none"
+        ocSettings.style.display = "none"
+        ocSave.style.display = "none"
+        ocTitle.style.display = "none"
+        config.textContent = "Config"
+        configGui.textContent = ""
+        configGui.style.display = "none"
+        configTxt.style.display = "none"
+        configSave.style.display = "none"
+        configTitle.style.display = "none"
         autoscroll.checked = true
         rigInfo.style.display = "block"
         rigInfoTitle.style.display = "block"
