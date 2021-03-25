@@ -701,6 +701,7 @@ cat <<-'HTML' > /tmp/index.html
             return response.text()
           })
           .then(function (text) {
+            setTimeout(rigOpenSetup, 3000)
             alert("Configuration saved successfully! New Fan control executed! You may need to reboot to apply remaining changes.")
           })
           .catch(function (error) {
