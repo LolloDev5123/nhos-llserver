@@ -664,6 +664,7 @@ cat <<-'HTML' > /tmp/index.html
               config.textContent = "Close Config"
               configTitle.style.display = "block"
               configSave.style.display = "inline-block"
+              oc.style.display = "none"
               autoscroll.checked = false
               top_.click()
               configTxt.value = JSON.stringify(json, null, "    ")
@@ -675,6 +676,7 @@ cat <<-'HTML' > /tmp/index.html
               alert("Error comunicating with local server. " + error)
             })
         } else {
+          oc.style.display = "inline-block"
           configGui.textContent = ""
           configGui.style.display = "none"
           config.textContent = "Config"
@@ -758,6 +760,7 @@ cat <<-'HTML' > /tmp/index.html
               oc.textContent = "Close OC Settings"
               ocTitle.style.display = "block"
               ocSave.style.display = "inline-block"
+              config.style.display = "none"
               autoscroll.checked = false
               top_.click()
               ocSettings.value = JSON.stringify(json, null, "\t")
@@ -769,6 +772,7 @@ cat <<-'HTML' > /tmp/index.html
               alert("Error comunicating with local server. " + error)
             })
         } else {
+          config.style.display = "inline-block"
           ocSettingsGui.textContent = ""
           ocSettingsGui.style.display = "none"
           oc.textContent = "OC Settings"
