@@ -795,8 +795,8 @@ cat <<-'HTML' > /tmp/index.html
             return response.text()
           })
           .then(function (text) {
-            setTimeout(rigOpenSetup, 5000)
             alert("OC Settings saved successfully!")
+            rigOpenSetup()
           })
           .catch(function (error) {
             alert("Error saving OC settings in local server. " + error)
