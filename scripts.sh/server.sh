@@ -873,29 +873,32 @@ cat <<-'HTML' > /tmp/index.html
         rigsList.style.display = "none"
         rigsListTitle.style.display = "none"
 
-        // Clear previous events
-        if (eventSource) {
-          eventSource.close()
-        }
-
-        // Connects to Server Sent Events
-        eventSource = new EventSource(rig.url + "/miners-logs")
-        eventSource.onmessage = function (e) {
-          // Limit logs history to 1000 lines
-          if (logs.childElementCount > 1000) {
-            while (logs.childElementCount > 1000) {
-              logs.removeChild(logs.firstChild)
-            }
+        // Wait five seconds before request logs files
+        setTimeout(function() {
+          // Clear previous events
+          if (eventSource) {
+            eventSource.close()
           }
-          setTimeout(function () {
-            logs.insertAdjacentHTML("beforeend", "<br>")
-            logs.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(e.data))
-            // AutoScroll if enabled
-            if (autoscroll.checked) {
-              window.scrollTo(0, document.body.scrollHeight)
+
+          // Connects to Server Sent Events
+          eventSource = new EventSource(rig.url + "/miners-logs")
+          eventSource.onmessage = function (e) {
+            // Limit logs history to 1000 lines
+            if (logs.childElementCount > 1000) {
+              while (logs.childElementCount > 1000) {
+                logs.removeChild(logs.firstChild)
+              }
             }
-          }, 100)
-        }
+            setTimeout(function () {
+              logs.insertAdjacentHTML("beforeend", "<br>")
+              logs.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(e.data))
+              // AutoScroll if enabled
+              if (autoscroll.checked) {
+                window.scrollTo(0, document.body.scrollHeight)
+              }
+            }, 100)
+          }
+        }, 5000)
       }
 
       // Gets current version and compares it with the latest version
