@@ -800,7 +800,7 @@ cat <<-'HTML' > /tmp/index.html
           })
           .then(function (text) {
             alert("OC Settings saved successfully!")
-            rigOpenSetup()
+            rigOpenSetup(5000)
           })
           .catch(function (error) {
             alert("Error saving OC settings in local server. " + error)
@@ -841,7 +841,7 @@ cat <<-'HTML' > /tmp/index.html
       }
 
       //Setup opened rig
-      function rigOpenSetup() {
+      function rigOpenSetup(timeout) {
         config.textContent = "Config"
         config.style.display = "inline-block"
         oc.textContent = "OC Settings"
@@ -898,7 +898,7 @@ cat <<-'HTML' > /tmp/index.html
               }
             }, 100)
           }
-        }, 5000)
+        }, timeout)
       }
 
       // Gets current version and compares it with the latest version
