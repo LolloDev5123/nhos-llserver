@@ -407,12 +407,6 @@ cat <<-'HTML' > /tmp/index.html
       var rigs = localStorage.getItem("rigs")
       if (rigs) {
         rigs = JSON.parse(rigs)
-      } else {
-        rigs = {list: [window.location.host]}
-      }
-
-      if (rigs.list.length === 0) {
-        rigs = {list: [window.location.host]}
       }
   
       // Polyfill if no AnsiUp 3rd party available
@@ -496,15 +490,21 @@ cat <<-'HTML' > /tmp/index.html
               number0.type = "number"
               number1.type = "number"
               number2.type = "number"
-              range0.value = mode["tdp"]
-              range1.value = mode["core_clocks"]
-              range2.value = mode["memory_clocks"]
+              if (mode["tdp"] != "default") {
+                range0.value = mode["tdp"]
+                number0.value = range0.value
+              }
+              if (mode["core_clocks"] != "default") {
+                range1.value = mode["core_clocks"]
+                number1.value = range1.value
+              }
+              if (mode["memory_clocks"] != "default") {
+                range2.value = mode["memory_clocks"]
+                number2.value = range2.value
+              }
               label0.textContent = "TDP "
               label1.textContent = "CORE "
               label2.textContent = "MEMORY "
-              number0.value = range0.value
-              number1.value = range1.value
-              number2.value = range2.value
               if (mode["mode"] !== "low") {
                 range0.classList.add("not-low-" + counter)
                 range1.classList.add("not-low-" + counter)
@@ -800,28 +800,14 @@ cat <<-'HTML' > /tmp/index.html
           })
           .then(function (text) {
             alert("OC Settings saved successfully!")
-            rigOpenSetup(5000)
+            rigOpenSetup(10000)
           })
           .catch(function (error) {
             alert("Error saving OC settings in local server. " + error)
           })
       })
 
-      // Gets Basic Rig information
-      rigInfo.addEventListener("loadinfo", function() {
-        fetch(rig.url + "/nhm.txt")
-          .then(function (response) {
-            return response.text()
-          })
-          .then(function (text) {
-            rigInfo.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(text))
-          })
-          .catch(function (error) {
-            rigInfo.insertAdjacentText("beforeend", error)
-          })
-      })
-
-      // Open a specifig rig
+      // Open a specific rig and get basic rig information
       function rigOpen(ip) {
         fetch(protocol + ip + "/nhm.txt")
           .then(function (response) {
@@ -829,14 +815,17 @@ cat <<-'HTML' > /tmp/index.html
                 rig.url = protocol + ip
                 localStorage.setItem("rigSelectedIp", ip.trim())
                 rigInfo.textContent = ""
-                rigInfo.dispatchEvent(new CustomEvent("loadinfo"))
                 rigOpenSetup()
+                return response.text()
               } else {
                 throw "Trying to fetch rig failed"
               }
           })
+          .then(function (text) {
+            rigInfo.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(text))
+          })
           .catch(function (error) {
-            alert(error)
+            rigInfo.insertAdjacentText("beforeend", error)
           })
       }
 
@@ -873,7 +862,7 @@ cat <<-'HTML' > /tmp/index.html
         rigsList.style.display = "none"
         rigsListTitle.style.display = "none"
 
-        // Wait five seconds before request logs files
+        // Add optional timeout before request logs files
         setTimeout(function() {
           // Clear previous events
           if (eventSource) {
@@ -884,10 +873,8 @@ cat <<-'HTML' > /tmp/index.html
           eventSource = new EventSource(rig.url + "/miners-logs")
           eventSource.onmessage = function (e) {
             // Limit logs history to 1000 lines
-            if (logs.childElementCount > 1000) {
-              while (logs.childElementCount > 1000) {
-                logs.removeChild(logs.firstChild)
-              }
+            while (logs.childElementCount > 1000) {
+              logs.removeChild(logs.firstChild)
             }
             setTimeout(function () {
               logs.insertAdjacentHTML("beforeend", "<br>")
@@ -1095,6 +1082,9 @@ cat <<-'HTML' > /tmp/index.html
           }
         })
         .finally(function() {
+          if (!rigs.list.includes(window.location.host)) {
+            rigs.list.unshift(window.location.host)
+          }
           rigs.list.forEach(function(ip) {
             rigAddGui(ip)
           })
