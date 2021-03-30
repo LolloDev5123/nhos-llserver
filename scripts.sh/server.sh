@@ -407,6 +407,8 @@ cat <<-'HTML' > /tmp/index.html
       var rigs = localStorage.getItem("rigs")
       if (rigs) {
         rigs = JSON.parse(rigs)
+      } else {
+        rigs = {"list": [window.location.host]}
       }
   
       // Polyfill if no AnsiUp 3rd party available
