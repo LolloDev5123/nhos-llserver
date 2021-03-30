@@ -4,9 +4,6 @@
 # By @totakaro 2021
 # MIT License
 
-# Edit your IP or IP range allowed to access this server here, also see https://nmap.org/ncat/guide/ncat-access.html
-ALLOW="192.168.0.0/24"
-
 # Check if NHOS logs are available to generate index.html
 while sleep 1; do
 if [ -d "/var/log/nhos/nhm" ]; then
@@ -407,8 +404,6 @@ cat <<-'HTML' > /tmp/index.html
       var rigs = localStorage.getItem("rigs")
       if (rigs) {
         rigs = JSON.parse(rigs)
-      } else {
-        rigs = {"list": [window.location.host]}
       }
   
       // Polyfill if no AnsiUp 3rd party available
@@ -1626,4 +1621,10 @@ cat <<-'LUA' > /tmp/httpd.lua
   })
 LUA
 
-ncat -n4 -lk -p 80 --allow $ALLOW --lua-exec /tmp/httpd.lua&
+# IP RESTRICTION (disabled by default)
+# Edit your IP or IP range allowed to access this server here, also see https://nmap.org/ncat/guide/ncat-access.html
+# ALLOW="192.168.0.0/24"
+# ncat -n4 -lk -p 80 --allow $ALLOW --lua-exec /tmp/httpd.lua&
+
+# Server without IP RESTRICTION (default)
+ncat -n4 -lk -p 80 --lua-exec /tmp/httpd.lua&
