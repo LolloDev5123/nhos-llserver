@@ -1164,30 +1164,30 @@ cat <<-LUA > "${HTTPD_FILE}"
   ------------------------------------------------------------------------------
 
   server_headers = {
-      ["Server"] = "Ncat --lua-exec httpd.lua",
-      ["Connection"] = "close",
+    ["Server"] = "Ncat --lua-exec httpd.lua",
+    ["Connection"] = "close",
   }
 
   function guess_mime(resource)
-      if string.sub(resource, -5) == ".html" then return "text/html; charset=utf-8" end
-      if string.sub(resource, -5) == ".json" then return "application/json; charset=utf-8" end
-      if string.sub(resource, -4) == ".txt" then return "text/plain; charset=utf-8" end
-      return "application/octet-stream"
+    if string.sub(resource, -5) == ".html" then return "text/html; charset=utf-8" end
+    if string.sub(resource, -5) == ".json" then return "application/json; charset=utf-8" end
+    if string.sub(resource, -4) == ".txt" then return "text/plain; charset=utf-8" end
+    return "application/octet-stream"
   end
 
   ------------------------------------------------------------------------------
-  --                       End of configuration section                       --
+  --                        End of configuration section                      --
   ------------------------------------------------------------------------------
 
   function print_rn(str)
-      io.stdout:write(str .. "\r\n")
-      io.stdout:flush()
+    io.stdout:write(str .. "\r\n")
+    io.stdout:flush()
   end
 
   function debug(str)
-      io.stderr:write("[" .. os.date() .. "] ")
-      io.stderr:write(str .. "\n")
-      io.stderr:flush()
+    io.stderr:write("[" .. os.date() .. "] ")
+    io.stderr:write(str .. "\n")
+    io.stderr:flush()
   end
 
   --Read a line of at most 8096 bytes (or whatever the first parameter says)
@@ -1196,16 +1196,16 @@ cat <<-LUA > "${HTTPD_FILE}"
   --truncated. This is here because io.stdin:read("*line") could lead to memory
   --exhaustion if we received gigabytes of characters with no newline.
   function read_line(max_len)
-      local ret = ""
-      for i = 1, (max_len or 8096) do
-          local chr = io.read(1)
-          if chr == "\n" then
-              return ret, true
-          end
-          ret = ret .. (chr or "")
+    local ret = ""
+    for i = 1, (max_len or 8096) do
+      local chr = io.read(1)
+      if chr == "\n" then
+        return ret, true
       end
+      ret = ret .. (chr or "")
+    end
 
-      return ret, false
+    return ret, false
   end
 
   --Make a response, output it and stop execution.
@@ -1216,70 +1216,70 @@ cat <<-LUA > "${HTTPD_FILE}"
   --point or a plain string.
   function make_response(params)
 
-      --Print the status line. If we got none, assume it is all okay.
-      if not params["status"] then
-          params["status"] = "HTTP/1.1 200 OK"
+    --Print the status line. If we got none, assume it is all okay.
+    if not params["status"] then
+      params["status"] = "HTTP/1.1 200 OK"
+    end
+    print_rn(params["status"])
+
+    --Send the date.
+    print_rn("Date: " .. os.date("!%a, %d %b %Y %H:%M:%S GMT"))
+
+    --Send the server headers as described in the configuration.
+    for key, value in pairs(server_headers) do
+      print_rn(("%s: %s"):format(key, value))
+    end
+
+    --Now send the headers from the parameter, if any.
+    if params["headers"] then
+      for key, value in pairs(params["headers"]) do
+        print_rn(("%s: %s"):format(key, value))
       end
-      print_rn(params["status"])
+    end
 
-      --Send the date.
-      print_rn("Date: " .. os.date("!%a, %d %b %Y %H:%M:%S GMT"))
+    --If there is any data, check if it is a function.
+    if params["data"] then
 
-      --Send the server headers as described in the configuration.
-      for key, value in pairs(server_headers) do
-          print_rn(("%s: %s"):format(key, value))
-      end
+      if type(params["data"]) == "function" then
 
-      --Now send the headers from the parameter, if any.
-      if params["headers"] then
-          for key, value in pairs(params["headers"]) do
-              print_rn(("%s: %s"):format(key, value))
+        print_rn("")
+        --debug("Starting buffered output...")
+
+        --run the function and print its contents, until we hit nil.
+        local f = params["data"]
+        while true do
+          ret = f()
+          if ret == nil then
+            --debug("Buffered output finished.")
+            break
           end
-      end
+          io.stdout:write(ret)
+          io.stdout:flush()
+        end
 
-      --If there is any data, check if it is a function.
-      if params["data"] then
-
-          if type(params["data"]) == "function" then
-
-              print_rn("")
-              --debug("Starting buffered output...")
-
-              --run the function and print its contents, until we hit nil.
-              local f = params["data"]
-              while true do
-                  ret = f()
-                  if ret == nil then
-                      --debug("Buffered output finished.")
-                      break
-                  end
-                  io.stdout:write(ret)
-                  io.stdout:flush()
-              end
-
-          else
-
-              --It is a plain string. Send its length and output it.
-              --debug("Just printing the data. Status: " .. params["status"])
-              print_rn("Content-length: " .. params["data"]:len())
-              print_rn("")
-              io.stdout:write(params["data"])
-              io.stdout:flush()
-
-          end
       else
-          print_rn("")
-      end
 
-      os.exit(0)
+        --It is a plain string. Send its length and output it.
+        --debug("Just printing the data. Status: " .. params["status"])
+        print_rn("Content-length: " .. params["data"]:len())
+        print_rn("")
+        io.stdout:write(params["data"])
+        io.stdout:flush()
+
+      end
+    else
+      print_rn("")
+    end
+
+    os.exit(0)
   end
 
   function make_error(error_str)
-      make_response({
-          ["status"] = "HTTP/1.1 "..error_str,
-          ["headers"] = {["Content-type"] = "text/html; charset=utf-8", ["Access-Control-Allow-Origin"] = "*"},
-          ["data"] = "<h1>"..error_str.."</h1>",
-      })
+    make_response({
+      ["status"] = "HTTP/1.1 "..error_str,
+      ["headers"] = {["Content-type"] = "text/html; charset=utf-8", ["Access-Control-Allow-Origin"] = "*"},
+      ["data"] = "<h1>"..error_str.."</h1>",
+    })
   end
 
   do_400 = function() make_error("400 Bad Request") end
@@ -1300,89 +1300,97 @@ cat <<-LUA > "${HTTPD_FILE}"
   -- * protocol version is followed by a single space.
   method, resource, protocol = input:match("([A-Z]+) ([^ ]+) ?(.*)")
 
+  --Route processing GET and POST methods:
+  -- * GET /, /miner-logs, /device_setings.json, /rigs.json, /nhm.txt, /configuration.txt
+  -- * POST /device_setings.json, /rigs.json, /configuration.txt
+  -- * /miner-logs is a event-stream using tail -f to monitor log files
+  -- * buffer is the acumulator to save POST requests
   buffer = ""
   if method == "GET" then
-      if resource == "/" then
-          resource = "${INDEX_FILE}"
-      elseif resource == "/${DEVICE_SETTINGS_JSON}" then
-          resource = "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
-      elseif resource == "/${RIGS_JSON}" then
-          resource = "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}"
-      elseif resource == "/${CONFIGURATION_TXT}" then
-          resource = "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}"
-      elseif resource == "/${NHM_TXT}" then
-          resource = "${NHM_TXT_FILE}"
-          nhm = io.open(resource, "r")
-          if nhm == nil then
-            make_response({
-                ["status"] = "HTTP/1.1 404 Not Found",
-                ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*"},
-                ["data"] = "No rig information found",
-            })
-          else
-            io.close()
-          end
-      elseif resource == "/miners-logs" then
-          logs = io.popen("tail -f ${NHOS_LOG_NHM_DIR}/miners/*.log ${NHOS_LOG_DIR}/*.log 2>/dev/null")
-          make_response({
-              ["status"] = "HTTP/1.1 200 Ok",
-              ["headers"] = {["Content-type"] = "text/event-stream; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
-              ["data"] = function() return "data: " .. logs:read ("*l") .. "\n\n" end,
-          })
+    if resource == "/" then
+      resource = "${INDEX_FILE}"
+    elseif resource == "/${DEVICE_SETTINGS_JSON}" then
+      resource = "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
+    elseif resource == "/${RIGS_JSON}" then
+      resource = "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}"
+    elseif resource == "/${CONFIGURATION_TXT}" then
+      resource = "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}"
+    elseif resource == "/${NHM_TXT}" then
+      resource = "${NHM_TXT_FILE}"
+      nhm = io.open(resource, "r")
+      if nhm == nil then
+        make_response({
+          ["status"] = "HTTP/1.1 404 Not Found",
+          ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*"},
+          ["data"] = "No rig information found",
+        })
       else
-        resource = ""
+        io.close()
       end
+    elseif resource == "/miners-logs" then
+      logs = io.popen("tail -f ${NHOS_LOG_NHM_DIR}/miners/*.log ${NHOS_LOG_DIR}/*.log 2>/dev/null")
+      make_response({
+        ["status"] = "HTTP/1.1 200 Ok",
+        ["headers"] = {["Content-type"] = "text/event-stream; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
+        ["data"] = function() return "data: " .. logs:read ("*l") .. "\n\n" end,
+      })
+    else
+      resource = ""
+    end
   elseif method == "POST" then
     if resource == "/${DEVICE_SETTINGS_JSON}" then
-        resource = "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
-        while true do
-          input = read_line() or ""
-          --debug("Input: " .. input)
-          if string.find(input, "^{") or buffer ~= "" then
-             buffer = buffer .. input .. "\n"
-          end
-          if string.find(input, "^}") then
-              break
-          end
+      resource = "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
+      while true do
+        input = read_line() or ""
+        --debug("Input: " .. input)
+        if string.find(input, "^{") or buffer ~= "" then
+          buffer = buffer .. input .. "\n"
         end
+        if string.find(input, "^}") then
+          break
+        end
+      end
     elseif resource == "/${RIGS_JSON}" then
-        resource = "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}"
-        while true do
-          input = read_line() or ""
-          --debug("Input: " .. input)
-          if string.find(input, "^{") or buffer ~= "" then
-             buffer = buffer .. input .. "\n"
-          end
-          if string.find(input, "^}") then
-              break
-          end
+      resource = "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}"
+      while true do
+        input = read_line() or ""
+        --debug("Input: " .. input)
+        if string.find(input, "^{") or buffer ~= "" then
+          buffer = buffer .. input .. "\n"
         end
+        if string.find(input, "^}") then
+          break
+        end
+      end
     elseif resource == "/${CONFIGURATION_TXT}" then
-        resource = "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}"
-        while true do
-          input = read_line() or ""
-          --debug("Input: " .. input)
-          if string.find(input, "^{") or buffer ~= "" then
-             buffer = buffer .. input .. "\n"
-          end
-          if string.find(input, "^}") then
-              break
-          end
+      resource = "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}"
+      while true do
+        input = read_line() or ""
+        --debug("Input: " .. input)
+        if string.find(input, "^{") or buffer ~= "" then
+          buffer = buffer .. input .. "\n"
         end
+        if string.find(input, "^}") then
+          break
+        end
+      end
     elseif resource == "/reboot" then
-        os.execute("sudo reboot&")
-        make_response({
-            ["data"] = "Rebooting...",
-            ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
-        })
+      os.execute("sudo reboot&")
+      make_response({
+        ["data"] = "Rebooting...",
+        ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
+      })
     else
-        resource = ""
+      resource = ""
     end
   else
     resource = ""
   end
 
-  --try to open the file...
+  --File handling to read and write resources:
+  -- * device_settings.json
+  -- * rigs.json
+  -- * configuration.txt
   json_headers = {["Content-type"] = "application/json; charset=utf-8", ["Access-Control-Allow-Origin"] = "*",  ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"}
   if buffer ~= "" and resource ~= nil then
     f = io.open(resource, "w")
@@ -1390,44 +1398,44 @@ cat <<-LUA > "${HTTPD_FILE}"
     f = io.open(resource, "rb")
   end
   if f == nil then
-      if resource == "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}" then
-        --opening file failed, wait for NHOS to generate ${DEVICE_SETTINGS_JSON}.
-        make_response({
-            ["status"] = "HTTP/1.1 404 Not Found",
-            ["headers"] = json_headers,
-            ["data"] = "{\"detected_devices\": []}",
-        })
-        debug("Error on resource " .. resource)
-      elseif resource == "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}" then
-        --opening file failed
-        make_response({
-            ["status"] = "HTTP/1.1 404 Not Found",
-            ["headers"] = json_headers,
-            ["data"] = "{\"list\": []}",
-        })
-        debug("Error on resource " .. resource)
-      else
-        do_404()
-      end
-  elseif buffer ~= "" then
-      os.execute("chmod +w "..resource)
-      f:write(buffer)
-      os.execute("chmod -w "..resource)
-      if resource == "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}" then
-        os.execute("sudo killall nhm3 && sudo /opt/nhos/nhm_start&")
-      elseif resource == "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}" then
-        os.execute("sudo killall nhos_gpu_fan_control && sudo /opt/nhos/nhos_gpu_fan_control&")
-      end
+    if resource == "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}" then
+      --opening file failed, wait NHOS to generate ${DEVICE_SETTINGS_JSON}.
       make_response({
-          ["data"] = "ok",
-          ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
+        ["status"] = "HTTP/1.1 404 Not Found",
+        ["headers"] = json_headers,
+        ["data"] = "{\"detected_devices\": []}",
       })
+      debug("Error on resource " .. resource)
+    elseif resource == "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}" then
+      --opening file failed
+      make_response({
+        ["status"] = "HTTP/1.1 404 Not Found",
+        ["headers"] = json_headers,
+        ["data"] = "{\"list\": []}",
+      })
+      debug("Error on resource " .. resource)
+    else
+      do_404()
+    end
+  elseif buffer ~= "" then
+    os.execute("chmod +w "..resource)
+    f:write(buffer)
+    os.execute("chmod -w "..resource)
+    if resource == "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}" then
+      os.execute("sudo killall nhm3 && sudo /opt/nhos/nhm_start&")
+    elseif resource == "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}" then
+      os.execute("sudo killall nhos_gpu_fan_control && sudo /opt/nhos/nhos_gpu_fan_control&")
+    end
+    make_response({
+      ["data"] = "ok",
+      ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
+    })
   end
 
   --and output it all.
   make_response({
-      ["data"] = function() return f:read(1024) end,
-      ["headers"] = {["Content-type"] = guess_mime(resource), ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
+    ["data"] = function() return f:read(1024) end,
+    ["headers"] = {["Content-type"] = guess_mime(resource), ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
   })
 LUA
 
