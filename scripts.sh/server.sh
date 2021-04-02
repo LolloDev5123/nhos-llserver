@@ -4,17 +4,32 @@
 # By @totakaro 2021
 # MIT License
 
-# Check if NHOS logs are available to generate index.html
-while sleep 1; do
-if [ -d "/var/log/nhos/nhm" ]; then
-head -1 /var/log/nhos/nhm/*.log > /tmp/nhm.txt
-head -2 /var/log/nhos/nhm/*.log | tail -1 >> /tmp/nhm.txt
-if [ ! -f /mnt/nhos/scripts.sh/rigs.json ]; then
-  echo '{"list":[]}' > /mnt/nhos/scripts.sh/rigs.json
+# Check root https://stackoverflow.com/a/18216122
+if [ `id -u` -ne 0 ]; then
+  echo "Please run as root"
+  exit 1
 fi
-# Makes device settings read only
-chmod -w /mnt/nhos/nhm/configs/device_settings.json
-cat <<-'HTML' > /tmp/index.html
+
+# Import NHOS vars
+. /etc/init.d/nhos-functions
+
+# Script vars
+VERSION='1.0.6'
+INDEX_FILE='/tmp/index.html'
+HTTPD_FILE='/tmp/httpd.lua'
+RIGS_JSON='rigs.json'
+RIGS_JSON_FILE="${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}"
+NHOS_LOG_NHM_DIR="${NHOS_LOG_DIR}/nhm"
+NHM_TXT='nhm.txt'
+NHM_TXT_FILE="/tmp/${NHM_TXT}"
+NVIDIA_GPU_THERMAL_SLOWDOWN_LOG_FILE="${NHOS_LOG_DIR}/nhos_gpu_nvidia_thermal_slowdown.log"
+DEVICE_SETTINGS_JSON='device_settings.json'
+NHOS_DEVICE_SETTINGS_FILE="${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
+CONFIGURATION_TXT='configuration.txt'
+SERVER_PGID='/var/run/ncat_lua_server.pid'
+
+# Main page index.html
+cat <<-HTML > "${INDEX_FILE}"
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -328,7 +343,7 @@ cat <<-'HTML' > /tmp/index.html
         </g>
       </g>
       </svg>
-      <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank" id="version">v1.0.6</a></small></sup>
+      <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank" id="version">v${VERSION}</a> ⚡ <a href="https://totakaro.github.io/donate" target="_blank">Donate</a></small></small></sup>
       <button id="rigs-all">Rigs</button> <button id="rig-add">Add rig</button>
       <button id="top">Go Top</button>
       <button id="bottom">Go Bottom</button>
@@ -407,7 +422,7 @@ cat <<-'HTML' > /tmp/index.html
       } else {
         rigs = {"list": [window.location.host]}
       }
-  
+
       // Polyfill if no AnsiUp 3rd party available
       if (typeof AnsiUp === "undefined") {
         AnsiUp = function () { }
@@ -438,11 +453,11 @@ cat <<-'HTML' > /tmp/index.html
         }
       })
 
-      // All inputs from device_settings.json
+      // All inputs from ${DEVICE_SETTINGS_JSON}
       function guiOCSetup(element) {
         var json = JSON.parse(element.value)
         if (json["detected_devices"].length === 0) {
-          ocSettingsGui.insertAdjacentText("beforeend", "No devices found, wait for NHOS to generate device_settings.json and try reopen OC settings again.")
+          ocSettingsGui.insertAdjacentText("beforeend", "No devices found, wait for NHOS to generate ${DEVICE_SETTINGS_JSON} and try reopen OC settings again.")
           return
         }
         let counter = 0
@@ -586,7 +601,7 @@ cat <<-'HTML' > /tmp/index.html
         })
       }
 
-      // All inputs from configuration.txt
+      // All inputs from ${CONFIGURATION_TXT}
       function guiConfig(element) {
         var json = JSON.parse(element.value), fanDefaults
         if (json["fan_control"] === undefined) {
@@ -652,10 +667,10 @@ cat <<-'HTML' > /tmp/index.html
         })
       }
 
-      // Open configuration.txt
+      // Open ${CONFIGURATION_TXT}
       config.addEventListener("click", function () {
         if (configTxt.style.display === "none") {
-          fetch(rig.url + "/configuration.txt")
+          fetch(rig.url + "/${CONFIGURATION_TXT}")
             .then(function (response) {
               return response.json()
             })
@@ -686,18 +701,18 @@ cat <<-'HTML' > /tmp/index.html
         }
       })
 
-      // Save configuration.txt
+      // Save ${CONFIGURATION_TXT}
       configSave.addEventListener("click", function () {
         try {
           JSON.parse(configTxt.value)
         } catch (err) {
-          alert("Error in your configuration.txt, please check again: " + err)
+          alert("Error in your ${CONFIGURATION_TXT}, please check again: " + err)
           return
         }
         if (!confirm("Please backup your configuration before save it.\nAre you sure to continue?")) {
           return
         }
-        fetch(rig.url + "/configuration.txt", { method: "POST", body: configTxt.value + "\n" })
+        fetch(rig.url + "/${CONFIGURATION_TXT}", { method: "POST", body: configTxt.value + "\n" })
           .then(function (response) {
             return response.text()
           })
@@ -706,7 +721,7 @@ cat <<-'HTML' > /tmp/index.html
             rigOpenSetup()
           })
           .catch(function (error) {
-            alert("Error saving configuration.txt in local server, reboot probably in progress. " + error)
+            alert("Error saving ${CONFIGURATION_TXT} in local server, reboot probably in progress. " + error)
           })
       })
 
@@ -751,7 +766,7 @@ cat <<-'HTML' > /tmp/index.html
           if (!confirm("CAUTION:\nOC can damage your hardware!\nEdit only if you know what you are doing!\nDo you wanna continue?")) {
             return
           }
-          fetch(rig.url + "/device_settings.json")
+          fetch(rig.url + "/${DEVICE_SETTINGS_JSON}")
             .then(function (response) {
               return response.json()
             })
@@ -793,7 +808,7 @@ cat <<-'HTML' > /tmp/index.html
         if (!confirm("Please backup your OC settings before save them.\nAre you sure to continue?")) {
           return
         }
-        fetch(rig.url + "/device_settings.json", { method: "POST", body: ocSettings.value + "\n" })
+        fetch(rig.url + "/${DEVICE_SETTINGS_JSON}", { method: "POST", body: ocSettings.value + "\n" })
           .then(function (response) {
             return response.text()
           })
@@ -808,7 +823,7 @@ cat <<-'HTML' > /tmp/index.html
 
       // Open a specific rig and get basic rig information
       function rigOpen(ip) {
-        fetch(protocol + ip + "/nhm.txt")
+        fetch(protocol + ip + "/${NHM_TXT}")
           .then(function (response) {
               if (response.ok) {
                 rig.url = protocol + ip
@@ -861,23 +876,53 @@ cat <<-'HTML' > /tmp/index.html
         rigsList.style.display = "none"
         rigsListTitle.style.display = "none"
 
+        // Scroll down to see latest logs
+        window.scrollTo(0, document.body.scrollHeight)
+
+        let dots, loading, line_color
+        if (eventSource) {
+          // Clear previous events
+          eventSource.close()
+          // Loading dots
+          loading = setTimeout(function() {
+            logs.insertAdjacentHTML("beforeend", "<br>")
+            logs.insertAdjacentText("beforeend", "Loading")
+            window.scrollTo(0, document.body.scrollHeight)
+            dots = setInterval(function () {
+              logs.insertAdjacentText("beforeend", ".")
+            }, 500)
+          }, 1000)
+        }
+
+        // Scroll down to see latest logs
+        window.scrollTo(0, document.body.scrollHeight)
+
         // Add optional timeout before request logs files
         setTimeout(function() {
-          // Clear previous events
-          if (eventSource) {
-            eventSource.close()
-          }
 
           // Connects to Server Sent Events
           eventSource = new EventSource(rig.url + "/miners-logs")
           eventSource.onmessage = function (e) {
+            // Stop loading dots
+            clearInterval(loading)
+            clearInterval(dots)
             // Limit logs history to 1000 lines
             while (logs.childElementCount > 1000) {
               logs.removeChild(logs.firstChild)
             }
             setTimeout(function () {
               logs.insertAdjacentHTML("beforeend", "<br>")
-              logs.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(e.data))
+              // Changes line_color according to thermal slowdown status for nvidia cards
+              if (e.data.includes("SW Thermal Slowdown")) {
+                if (e.data.includes(": Active")) {
+                  line_color = "\033[0;31m" // Red
+                } else {
+                  line_color = "\033[0;32m" // Green
+                }
+              } else {
+                line_color = "\033[0m" // Reset no color
+              }
+              logs.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(line_color + e.data + "\033[0m"))
               // AutoScroll if enabled
               if (autoscroll.checked) {
                 window.scrollTo(0, document.body.scrollHeight)
@@ -929,6 +974,7 @@ cat <<-'HTML' > /tmp/index.html
         return fullUptime
       }
 
+      // Adds rig to the rigs list gui
       function rigAddGui(ip) {
         let rigItem = document.createElement("div")
         let rigItemActions = document.createElement("div")
@@ -952,7 +998,7 @@ cat <<-'HTML' > /tmp/index.html
         rigItem.classList.add("offline")
         rigOpenButton.classList.add("disabled")
         rigOpenButton.disabled = true
-        fetch(protocol + ip + "/nhm.txt")
+        fetch(protocol + ip + "/${NHM_TXT}")
           .then(function (response) {
             if (response.ok) {
               return response.text()
@@ -1005,7 +1051,7 @@ cat <<-'HTML' > /tmp/index.html
         rigItemActions.appendChild(rigRemoveButton)
         rigItem.appendChild(rigItemActions)
         rigsList.appendChild(rigItem)
-        fetch(protocol + window.location.host + "/rigs.json", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
+        fetch(protocol + window.location.host + "/${RIGS_JSON}", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
         localStorage.setItem("rigs", JSON.stringify(rigs))
         rigRemoveButton.addEventListener("click", function() {
           if(confirm("Are you sure to remove this rig from the list?")) {
@@ -1013,7 +1059,7 @@ cat <<-'HTML' > /tmp/index.html
             rigs.list = rigs.list.filter(function(item) {
                 return item !== ip
             })
-            fetch(protocol + window.location.host + "/rigs.json", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
+            fetch(protocol + window.location.host + "/${RIGS_JSON}", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
             localStorage.setItem("rigs", JSON.stringify(rigs))
           }
         })
@@ -1022,6 +1068,7 @@ cat <<-'HTML' > /tmp/index.html
         })
       }
 
+      // List all rigs
       rigsAll.addEventListener("click", function() {
         localStorage.removeItem("rigSelectedIp")
         ocSettingsGui.textContent = ""
@@ -1060,6 +1107,7 @@ cat <<-'HTML' > /tmp/index.html
         }
       })
 
+      // Add new rig to the list
       rigAdd.addEventListener("click", function() {
         let ip = prompt("Add your rig address:")
         if (ip) {
@@ -1071,7 +1119,8 @@ cat <<-'HTML' > /tmp/index.html
         }
       })
 
-      fetch(protocol + window.location.host + "/rigs.json")
+      // Check rigs
+      fetch(protocol + window.location.host + "/${RIGS_JSON}")
         .then(function(response) {
             return response.json()
         })
@@ -1088,6 +1137,8 @@ cat <<-'HTML' > /tmp/index.html
             rigAddGui(ip)
           })
         })
+
+      // Check if a rig is open or show full rigs list
       var rigSelectedIp = localStorage.getItem("rigSelectedIp")
       if (rigSelectedIp) {
         rigOpen(rigSelectedIp)
@@ -1100,13 +1151,10 @@ cat <<-'HTML' > /tmp/index.html
 
   </html>
 HTML
-break
-fi
-done&
 
-# Main server
-# Based from Lua httpd server https://github.com/nmap/nmap/blob/master/ncat/scripts/httpd.lua
-cat <<-'LUA' > /tmp/httpd.lua
+# Main server file
+# Based on Lua httpd server https://github.com/nmap/nmap/blob/master/ncat/scripts/httpd.lua
+cat <<-LUA > "${HTTPD_FILE}"
   --httpd.lua - a dead simple HTTP server. Expects GET requests and serves files
   --matching these requests. Can guess mime based on an extension too. Currently
   --disallows any filenames that start or end with "..".
@@ -1142,12 +1190,6 @@ cat <<-'LUA' > /tmp/httpd.lua
       io.stderr:flush()
   end
 
-  function url_decode(str)
-      --taken from here: http://lua-users.org/wiki/StringRecipes
-      return str:gsub("%%(%x%x)",
-          function(h) return string.char(tonumber(h,16)) end)
-  end
-
   --Read a line of at most 8096 bytes (or whatever the first parameter says)
   --from standard input. Returns the string and a boolean value that is true if
   --we hit the newline (defined as "\n") or false if the line had to be
@@ -1166,198 +1208,6 @@ cat <<-'LUA' > /tmp/httpd.lua
       return ret, false
   end
 
-  --The following function and variables was translated from Go to Lua. The
-  --original code can be found here:
-  --
-  --http://golang.org/src/pkg/unicode/utf8/utf8.go#L45
-  local surrogate_min = 0xD800
-  local surrogate_max = 0xDFFF
-
-  local t1 = 0x00 -- 0000 0000
-  local tx = 0x80 -- 1000 0000
-  local t2 = 0xC0 -- 1100 0000
-  local t3 = 0xE0 -- 1110 0000
-  local t4 = 0xF0 -- 1111 0000
-  local t5 = 0xF8 -- 1111 1000
-
-  local maskx = 0x3F -- 0011 1111
-  local mask2 = 0x1F -- 0001 1111
-  local mask3 = 0x0F -- 0000 1111
-  local mask4 = 0x07 -- 0000 0111
-
-  local char1_max = 0x7F    -- (1<<7)  - 1
-  local char2_max = 0x07FF  -- (1<<11) - 1
-  local char3_max = 0xFFFF  -- (1<<16) - 1
-
-  local max_char = 0x10FFFF -- \U0010FFFF
-
-  function get_next_char_len(p)
-      local n = p:len()
-      local c0 = p:byte(1)
-
-      --1-byte, 7-bit sequence?
-      if c0 < tx then
-          return 1
-      end
-
-      --unexpected continuation byte?
-      if c0 < t2 then
-          return nil
-      end
-
-      --need first continuation byte
-      if n < 2 then
-          return nil
-      end
-      local c1 = p:byte(2)
-      if c1 < tx or t2 <= c1 then
-          return nil
-      end
-
-      --2-byte, 11-bit sequence?
-      if c0 < t3 then
-          local l1 = bit32.lshift(bit32.band(c0,mask2),6)
-          local l2 = bit32.band(c1,maskx)
-          local r = bit32.bor(l1, l2)
-          if r <= char1_max then
-              return nil
-          end
-          return 2
-      end
-
-      --need second continuation byte
-      if n < 3 then
-          return nil
-      end
-      local c2 = p:byte(3)
-      if c2 < tx or t2 <= c2 then
-          return nil
-      end
-
-      --3-byte, 16-bit sequence?
-      if c0 < t4 then
-          local l1 = bit32.lshift(bit32.band(c0, mask3), 12)
-          local l2 = bit32.lshift(bit32.band(c1, maskx), 6)
-          local l3 = bit32.band(c2, maskx)
-          local r = bit32.bor(l1, l2, l3)
-          if r <= char2_max then
-              return nil
-          end
-          if surrogate_min <= r and r <= surrogate_max then
-              return nil
-          end
-          return 3
-      end
-
-      --need third continuation byte
-      if n < 4 then
-          return nil
-      end
-      local c3 = p:byte(4)
-      if c3 < tx or t2 <= c3 then
-          return nil
-      end
-
-      --4-byte, 21-bit sequence?
-      if c0 < t5 then
-          local l1 = bit32.lshift(bit32.band(c0, mask4),18)
-          local l2 = bit32.lshift(bit32.band(c1, maskx), 12)
-          local l3 = bit32.lshift(bit32.band(c2, maskx), 6)
-          local l4 = bit32.band(c3, maskx)
-          local r = bit32.bor(l1,l2,l3,l4)
-          if r <= char3_max or max_char < r then
-              return nil
-          end
-          return 4
-      end
-
-      --error
-      return nil
-  end
-
-  function validate_utf8(s)
-      local i = 1
-      local len = s:len()
-      while i <= len do
-          local size = get_next_char_len(s:sub(i))
-          if size == nil then
-              return false
-          end
-          i = i + size
-      end
-      return true
-  end
-
-  --Returns a table containing the list of directories resulting from splitting
-  --the argument by '/'.
-  function split_path(path)
-      --[[
-      for _, v in pairs({"/a/b/c", "a/b/c", "//a/b/c", "a/b/c/", "a/b/c//"}) do
-          print(v,table.concat(split_path(v), ','))
-      end
-
-      -- /a/b/c  ,a,b,c
-      -- a/b/c   a,b,c
-      -- //a/b/c ,,a,b,c
-      -- a/b/c/  a,b,c
-      -- a/b/c// a,b,c,
-      ]]
-      local ret  = {}
-      local j = 0
-      for i=1, path:len() do
-          if path:sub(i,i) == '/' then
-              if j == 0 then
-                  ret[#ret+1] = path:sub(1, i-1)
-              else
-                  ret[#ret+1] = path:sub(j+1, i-1)
-              end
-              j = i
-          end
-      end
-      if j ~= path:len() then
-          ret[#ret+1] = path:sub(j+1, path:len())
-      end
-      return ret
-  end
-
-
-  function is_path_valid(resource)
-      --remove the beginning slash
-      resource = string.sub(resource, 2, string.len(resource))
-
-      --Windows drive names are not welcome.
-      if resource:match("^([a-zA-Z]):") then
-          return false
-      end
-
-      --if it starts with a dot or a slash or a backslash, forbid any acccess to it.
-      first_char = resource:sub(1, 1)
-
-      if first_char == "." then
-          return false
-      end
-
-      if first_char == "/" then
-          return false
-      end
-
-      if resource:find("\\") then
-          return false
-      end
-
-      for _, directory in pairs(split_path(resource)) do
-          if directory == '' then
-              return false
-          end
-
-          if directory == '..' then
-              return false
-          end
-      end
-
-      return true
-  end
-
   --Make a response, output it and stop execution.
   --
   --It takes an associative array with three optional keys: status (status line)
@@ -1366,7 +1216,7 @@ cat <<-'LUA' > /tmp/httpd.lua
   --point or a plain string.
   function make_response(params)
 
-      --Print the status line. If we got none, assume it's all okay.
+      --Print the status line. If we got none, assume it is all okay.
       if not params["status"] then
           params["status"] = "HTTP/1.1 200 OK"
       end
@@ -1387,7 +1237,7 @@ cat <<-'LUA' > /tmp/httpd.lua
           end
       end
 
-      --If there's any data, check if it's a function.
+      --If there is any data, check if it is a function.
       if params["data"] then
 
           if type(params["data"]) == "function" then
@@ -1409,8 +1259,8 @@ cat <<-'LUA' > /tmp/httpd.lua
 
           else
 
-              --It's a plain string. Send its length and output it.
-              --debug("Just printing the data. Status='" .. params["status"] .. "'")
+              --It is a plain string. Send its length and output it.
+              --debug("Just printing the data. Status: " .. params["status"])
               print_rn("Content-length: " .. params["data"]:len())
               print_rn("")
               io.stdout:write(params["data"])
@@ -1444,46 +1294,24 @@ cat <<-'LUA' > /tmp/httpd.lua
 
   input, success = read_line()
 
-  --debug("Input: " .. input)
-
-  --if not success then
-  --    do_414()
-  --end
-
-  --if input:sub(-1) == "\r" then
-  --    input = input:sub(1,-2)
-  --end
-
   --We assume that:
   -- * a method is alphanumeric uppercase,
-  -- * resource may contain anything that's not a space,
+  -- * resource may contain anything that is not a space,
   -- * protocol version is followed by a single space.
   method, resource, protocol = input:match("([A-Z]+) ([^ ]+) ?(.*)")
-
-  --if resource:find(string.char(0)) ~= nil then
-  --    do_400()
-  --end
-
-  --if not validate_utf8(resource) then
-  --    do_400()
-  --end
-
-  --if method ~= "GET" then
-  --    do_405()
-  --end
 
   buffer = ""
   if method == "GET" then
       if resource == "/" then
-          resource = "/tmp/index.html"
-      elseif resource == "/device_settings.json" then
-          resource = "/mnt/nhos/nhm/configs/device_settings.json"
-      elseif resource == "/rigs.json" then
-          resource = "/mnt/nhos/scripts.sh/rigs.json"
-      elseif resource == "/configuration.txt" then
-          resource = "/mnt/nhos/configuration.txt"
-      elseif resource == "/nhm.txt" then
-          resource = "/tmp/nhm.txt"
+          resource = "${INDEX_FILE}"
+      elseif resource == "/${DEVICE_SETTINGS_JSON}" then
+          resource = "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
+      elseif resource == "/${RIGS_JSON}" then
+          resource = "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}"
+      elseif resource == "/${CONFIGURATION_TXT}" then
+          resource = "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}"
+      elseif resource == "/${NHM_TXT}" then
+          resource = "${NHM_TXT_FILE}"
           nhm = io.open(resource, "r")
           if nhm == nil then
             make_response({
@@ -1495,7 +1323,7 @@ cat <<-'LUA' > /tmp/httpd.lua
             io.close()
           end
       elseif resource == "/miners-logs" then
-          logs = io.popen("tail -f /var/log/nhos/nhm/miners/*.log /var/log/nhos/*.log 2>/dev/null")
+          logs = io.popen("tail -f ${NHOS_LOG_NHM_DIR}/miners/*.log ${NHOS_LOG_DIR}/*.log 2>/dev/null")
           make_response({
               ["status"] = "HTTP/1.1 200 Ok",
               ["headers"] = {["Content-type"] = "text/event-stream; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
@@ -1505,8 +1333,8 @@ cat <<-'LUA' > /tmp/httpd.lua
         resource = ""
       end
   elseif method == "POST" then
-    if resource == "/device_settings.json" then
-        resource = "/mnt/nhos/nhm/configs/device_settings.json"
+    if resource == "/${DEVICE_SETTINGS_JSON}" then
+        resource = "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
         while true do
           input = read_line() or ""
           --debug("Input: " .. input)
@@ -1517,8 +1345,8 @@ cat <<-'LUA' > /tmp/httpd.lua
               break
           end
         end
-    elseif resource == "/rigs.json" then
-        resource = "/mnt/nhos/scripts.sh/rigs.json"
+    elseif resource == "/${RIGS_JSON}" then
+        resource = "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}"
         while true do
           input = read_line() or ""
           --debug("Input: " .. input)
@@ -1529,8 +1357,8 @@ cat <<-'LUA' > /tmp/httpd.lua
               break
           end
         end
-    elseif resource == "/configuration.txt" then
-        resource = "/mnt/nhos/configuration.txt"
+    elseif resource == "/${CONFIGURATION_TXT}" then
+        resource = "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}"
         while true do
           input = read_line() or ""
           --debug("Input: " .. input)
@@ -1554,26 +1382,6 @@ cat <<-'LUA' > /tmp/httpd.lua
     resource = ""
   end
 
-  --debug("Got a request for '" .. method .. resource .. "' (urldecoded: '" .. url_decode(resource) .. "')." .. input)
-  --resource = url_decode(resource)
-
-  --make sure that the resource starts with a slash.
-  --if resource:sub(1, 1) ~= '/' then
-  --    do_400() --could probably use a fancier error here.
-  --end
-
-  --if not is_path_valid(resource) then
-  --    do_403()
-  --end
-
-  --try to make all file openings from now on relative to the NHOS working directory.
-  --resource = "./" .. resource
-
-  --If it's a directory, try to load index.html from it.
-  --if resource:sub(-1) == "/" then
-  --    resource = resource .. '/index.html'
-  --end
-
   --try to open the file...
   json_headers = {["Content-type"] = "application/json; charset=utf-8", ["Access-Control-Allow-Origin"] = "*",  ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"}
   if buffer ~= "" and resource ~= nil then
@@ -1582,15 +1390,15 @@ cat <<-'LUA' > /tmp/httpd.lua
     f = io.open(resource, "rb")
   end
   if f == nil then
-      if resource == "/mnt/nhos/nhm/configs/device_settings.json" then
-        --opening file failed, wait for NHOS to generate device_settings.json.
+      if resource == "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}" then
+        --opening file failed, wait for NHOS to generate ${DEVICE_SETTINGS_JSON}.
         make_response({
             ["status"] = "HTTP/1.1 404 Not Found",
             ["headers"] = json_headers,
             ["data"] = "{\"detected_devices\": []}",
         })
         debug("Error on resource " .. resource)
-      elseif resource == "/mnt/nhos/scripts.sh/rigs.json" then
+      elseif resource == "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}" then
         --opening file failed
         make_response({
             ["status"] = "HTTP/1.1 404 Not Found",
@@ -1605,9 +1413,9 @@ cat <<-'LUA' > /tmp/httpd.lua
       os.execute("chmod +w "..resource)
       f:write(buffer)
       os.execute("chmod -w "..resource)
-      if resource == "/mnt/nhos/nhm/configs/device_settings.json" then
+      if resource == "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}" then
         os.execute("sudo killall nhm3 && sudo /opt/nhos/nhm_start&")
-      elseif resource == "/mnt/nhos/configuration.txt" then
+      elseif resource == "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}" then
         os.execute("sudo killall nhos_gpu_fan_control && sudo /opt/nhos/nhos_gpu_fan_control&")
       end
       make_response({
@@ -1623,10 +1431,104 @@ cat <<-'LUA' > /tmp/httpd.lua
   })
 LUA
 
-# IP RESTRICTION (disabled by default)
-# Edit your IP or IP range allowed to access this server here, also see https://nmap.org/ncat/guide/ncat-access.html
-# ALLOW="192.168.0.0/24"
-# ncat -n4 -lk -p 80 --allow $ALLOW --lua-exec /tmp/httpd.lua&
+# Check rigs saved
+rigs_json()
+{
+  if [ ! -f ${RIGS_JSON_FILE} ]; then
+    mkdir -p ${NHOS_DATA_DIR}/nhm/configs
+    echo '{"list":[]}' > ${RIGS_JSON_FILE}
+  fi
+}
 
-# Server without IP RESTRICTION (default)
-ncat -n4 -lk -p 80 --lua-exec /tmp/httpd.lua&
+RIGS='rigs_json'
+
+# Gets rig info
+rig_info()
+{
+  head -1 ${NHOS_LOG_NHM_DIR}/*.log > ${NHM_TXT_FILE}
+  head -2 ${NHOS_LOG_NHM_DIR}/*.log | tail -1 >> ${NHM_TXT_FILE}
+}
+
+RIG_INFO='rig_info'
+
+# Adds date to logs
+prepend_date()
+{
+  while IFS= read -r INPUT; do
+    echo "[$(date +%D) $(date +%T)] $INPUT"
+  done
+}
+
+# Monitor thermal slowdown status for nvidia cards
+nvidia_smi_monitor()
+{
+  nvidia-smi -q | grep -q -E 'Product Name|SW'
+  if [ $? -eq 0 ]; then
+    touch -a ${NVIDIA_GPU_THERMAL_SLOWDOWN_LOG_FILE}
+    while sleep 60; do
+      nvidia-smi -q | grep -E 'Product Name|SW' | tr -s ' ' | prepend_date > ${NVIDIA_GPU_THERMAL_SLOWDOWN_LOG_FILE}
+    done&
+  fi
+}
+
+NVIDIA_SMI_MONITOR='nvidia_smi_monitor'
+
+# Ncat Lua httpd Server
+server_listen()
+{
+  ncat -n4 -lk -p 80 --lua-exec ${HTTPD_FILE}&
+  # Get the current group id
+  ps -o pgid,pid | grep $! | awk '{printf $1}' > ${SERVER_PGID}
+}
+
+SERVER_LISTEN='server_listen'
+
+# Shellscript like a service https://unix.stackexchange.com/a/236307
+case "$1" in
+--version)
+  echo "$0 v${VERSION}"
+  ;;
+--help)
+  echo "Usage: $0 {start|stop|status|restart}"
+  ;;
+start)
+  if [ -f ${SERVER_PGID} ]; then
+    exit 0
+  fi
+  # Check if NHOS logs are available to execute the server
+  while sleep 1; do
+    if [ -d ${NHOS_LOG_NHM_DIR} ]; then
+      ${RIGS}
+      ${RIG_INFO}
+      ${NVIDIA_SMI_MONITOR}
+      ${SERVER_LISTEN}
+      break
+    fi
+  done&
+  ;;
+stop)
+  if [ -f ${SERVER_PGID} ]; then
+    kill -- -`cat ${SERVER_PGID}`
+    rm ${SERVER_PGID}
+  fi
+  ;;
+restart)
+  sh $0 stop
+  sh $0 start
+  ;;
+status)
+  if [ -e ${SERVER_PGID} ]; then
+    echo "$0 is running, pgid=`cat ${SERVER_PGID}`"
+  else
+    echo "$0 is NOT running"
+    exit 1
+  fi
+  ;;
+*)
+  # Start if not running
+  if [ ! -f ${SERVER_PGID} ]; then
+    sh $0 start
+  fi
+esac
+
+exit 0
