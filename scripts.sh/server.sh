@@ -1300,12 +1300,26 @@ cat <<-LUA > "${HTTPD_FILE}"
   -- * protocol version is followed by a single space.
   method, resource, protocol = input:match("([A-Z]+) ([^ ]+) ?(.*)")
 
+  --Read json input and save it on buffer
+  buffer = ""
+  function read_json()
+    while true do
+      input = read_line() or ""
+      --debug("Input: " .. input)
+      if string.find(input, "^{") or buffer ~= "" then
+        buffer = buffer .. input .. "\n"
+      end
+      if string.find(input, "^}") then
+        break
+      end
+    end
+  end
+
   --Route processing GET and POST methods:
   -- * GET /, /miner-logs, /device_setings.json, /rigs.json, /nhm.txt, /configuration.txt
   -- * POST /device_setings.json, /rigs.json, /configuration.txt
   -- * /miner-logs is a event-stream using tail -f to monitor log files
   -- * buffer is the acumulator to save POST requests
-  buffer = ""
   if method == "GET" then
     if resource == "/" then
       resource = "${INDEX_FILE}"
@@ -1340,40 +1354,13 @@ cat <<-LUA > "${HTTPD_FILE}"
   elseif method == "POST" then
     if resource == "/${DEVICE_SETTINGS_JSON}" then
       resource = "${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
-      while true do
-        input = read_line() or ""
-        --debug("Input: " .. input)
-        if string.find(input, "^{") or buffer ~= "" then
-          buffer = buffer .. input .. "\n"
-        end
-        if string.find(input, "^}") then
-          break
-        end
-      end
+      read_json()
     elseif resource == "/${RIGS_JSON}" then
       resource = "${NHOS_DATA_DIR}/nhm/configs/${RIGS_JSON}"
-      while true do
-        input = read_line() or ""
-        --debug("Input: " .. input)
-        if string.find(input, "^{") or buffer ~= "" then
-          buffer = buffer .. input .. "\n"
-        end
-        if string.find(input, "^}") then
-          break
-        end
-      end
+      read_json()
     elseif resource == "/${CONFIGURATION_TXT}" then
       resource = "${NHOS_DATA_DIR}/${CONFIGURATION_TXT}"
-      while true do
-        input = read_line() or ""
-        --debug("Input: " .. input)
-        if string.find(input, "^{") or buffer ~= "" then
-          buffer = buffer .. input .. "\n"
-        end
-        if string.find(input, "^}") then
-          break
-        end
-      end
+      read_json()
     elseif resource == "/reboot" then
       os.execute("sudo reboot&")
       make_response({
