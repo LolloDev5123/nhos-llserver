@@ -27,6 +27,7 @@ DEVICE_SETTINGS_JSON='device_settings.json'
 NHOS_DEVICE_SETTINGS_FILE="${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
 CONFIGURATION_TXT='configuration.txt'
 SERVER_PGID='/var/run/server.pgid'
+TRUSTED_HOSTS_FILE="${NHOS_DATA_DIR}/trusted-hosts.txt"
 
 # Main page index.html
 cat <<-HTML > "${INDEX_FILE}"
@@ -1495,7 +1496,12 @@ NVIDIA_SMI_MONITOR='nvidia_smi_monitor'
 # Ncat Lua httpd Server
 server_listen()
 {
-  ncat -n4 -lk -p 80 --lua-exec ${HTTPD_FILE}&
+  # Add support for trusted hosts access https://nmap.org/ncat/guide/ncat-access.html
+  if [ -f ${TRUSTED_HOSTS_FILE} ]; then
+    ncat -n4 -lk -p 80 --allowfile ${TRUSTED_HOSTS_FILE} --lua-exec ${HTTPD_FILE}&
+  else
+    ncat -n4 -lk -p 80 --lua-exec ${HTTPD_FILE}&
+  fi
   # Get the current group id
   ps -o pgid,pid | grep $! | awk '{printf $1}' > ${SERVER_PGID}
 }
