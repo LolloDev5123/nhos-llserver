@@ -28,6 +28,10 @@ NHOS_DEVICE_SETTINGS_FILE="${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
 CONFIGURATION_TXT='configuration.txt'
 SERVER_PGID='/var/run/server.pgid'
 TRUSTED_HOSTS_FILE="${NHOS_DATA_DIR}/trusted-hosts.txt"
+SERVER_FILE="${NHOS_DATA_DIR}/scripts.sh/server.sh"
+UPDATE_API='https://api.github.com/repos/totakaro/nhos-llserver/releases/latest'
+# Only for development, empty on production
+DEV_UPDATE_API='https://raw.githubusercontent.com/totakaro/nhos-llserver/v1.0.6/scripts.sh/server.sh'
 
 # Main page index.html
 cat <<-HTML > "${INDEX_FILE}"
@@ -344,7 +348,7 @@ cat <<-HTML > "${INDEX_FILE}"
         </g>
       </g>
       </svg>
-      <sup><small><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank" id="version">v${VERSION}</a> ⚡ <a href="https://totakaro.github.io/donate" target="_blank">Donate</a></small></small></sup>
+      <sup><small><span id="version"><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank">v${VERSION}</a></span>⚡ <a href="https://totakaro.github.io/donate" target="_blank">Donate</a></small></small></sup>
       <button id="rigs-all">Rigs</button> <button id="rig-add">Add rig</button>
       <button id="top">Go Top</button>
       <button id="bottom">Go Bottom</button>
@@ -945,14 +949,29 @@ cat <<-HTML > "${INDEX_FILE}"
       }
 
       // Gets current version and compares it with the latest version
-      fetch("https://api.github.com/repos/totakaro/nhos-llserver/releases/latest")
+      fetch("${UPDATE_API}")
         .then(function (response) { return response.json() }).then(function (json) {
           let currentVersion = json["tag_name"]
-          version
           if (version.textContent !== currentVersion) {
-            version.insertAdjacentText("beforeend", " (Latest is " + currentVersion + ")")
+            version.insertAdjacentHTML("beforeend", " <a href=\"#\" onclick=\"update(event)\">(Update to " + currentVersion + ")</a>")
           }
         })
+
+      window.update = function(e) {
+        e.preventDefault()
+        if (confirm("Are you sure to update to the latest version?")) {
+          fetch(rig.url + "/update", { method: "POST" })
+            .then(function (response) {
+              return response.text()
+            })
+            .then(function (text) {
+              alert("Update request executed! " + text)
+            })
+            .catch(function (error) {
+              alert("Error comunicating with local server, update probably in progress. " + error)
+            })
+        }
+      }
 
       // Calculate time since https://stackoverflow.com/a/3177838
       function timeSince(date) {
@@ -1392,6 +1411,12 @@ cat <<-LUA > "${HTTPD_FILE}"
         ["data"] = "Rebooting...",
         ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
       })
+    elseif resource == "/update" then
+      os.execute("sudo sh ${SERVER_FILE} update&")
+      make_response({
+        ["data"] = "Updating...",
+        ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
+      })
     else
       resource = ""
     end
@@ -1514,7 +1539,7 @@ case "$1" in
   echo "$0 v${VERSION}"
   ;;
 --help)
-  echo "Usage: $0 {start|stop|status|restart}"
+  echo "Usage: $0 {start|stop|status|restart|update}"
   ;;
 start)
   if [ -f ${SERVER_PGID} ]; then
@@ -1540,6 +1565,21 @@ stop)
 restart)
   sh $0 stop
   sh $0 start
+  ;;
+update)
+  rm -rf /tmp/update
+  mkdir -p /tmp/update
+  cd /tmp/update
+  if [ -z "$DEV_UPDATE_API" ]; then
+    wget -O update.tar.gz `curl -s ${UPDATE_API} | jq -r '.tarball_url'`
+    tar -xzvf update.tar.gz --strip-components=1
+    cp /tmp/update/scripts.sh/server.sh ${SERVER_FILE}
+  else
+    wget $DEV_UPDATE_API
+    cp /tmp/server.sh ${SERVER_FILE}
+  fi
+  cd -
+  sh $0 restart
   ;;
 status)
   if [ -e ${SERVER_PGID} ]; then
