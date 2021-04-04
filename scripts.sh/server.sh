@@ -26,7 +26,7 @@ NVIDIA_GPU_THERMAL_SLOWDOWN_LOG_FILE="${NHOS_LOG_DIR}/nhos_gpu_nvidia_thermal_sl
 DEVICE_SETTINGS_JSON='device_settings.json'
 NHOS_DEVICE_SETTINGS_FILE="${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
 CONFIGURATION_TXT='configuration.txt'
-SERVER_PGID='/var/run/ncat_lua_server.pid'
+SERVER_PGID='/var/run/server.pgid'
 
 # Main page index.html
 cat <<-HTML > "${INDEX_FILE}"
@@ -879,46 +879,51 @@ cat <<-HTML > "${INDEX_FILE}"
         loadLogs(timeout)
       }
 
+      var dots = [], loading = []
       function loadLogs(timeout) {
         // Scroll down to see latest logs
         if (autoscroll.checked) {
           window.scrollTo(0, document.body.scrollHeight)
         }
 
-        let dots, loading, line_color
         if (eventSource) {
           // Clear previous events
           eventSource.close()
           // Loading dots
-          loading = setTimeout(function() {
+          loading.push(setTimeout(function() {
             logs.insertAdjacentHTML("beforeend", "<br>")
             logs.insertAdjacentText("beforeend", "Loading")
             if (autoscroll.checked) {
               window.scrollTo(0, document.body.scrollHeight)
             }
-            dots = setInterval(function () {
+            dots.push(setInterval(function () {
               logs.insertAdjacentText("beforeend", ".")
-            }, 500)
-          }, 1000)
+            }, 500))
+          }, 1000))
         }
 
 
         // Add optional timeout before request logs files
         setTimeout(function() {
+          let line_color
 
           // Connects to Server Sent Events
           eventSource = new EventSource(rig.url + "/miners-logs")
           eventSource.onmessage = function (e) {
             // Stop loading dots
-            clearInterval(loading)
-            clearInterval(dots)
+            loading.forEach(function (timeoutId) {
+              clearTimeout(timeoutId)
+            })
+            dots.forEach(function (intervalId) {
+              clearInterval(intervalId)
+            })
             // Limit logs history to 1000 lines
             while (logs.childElementCount > 1000) {
               logs.removeChild(logs.firstChild)
             }
             setTimeout(function () {
               logs.insertAdjacentHTML("beforeend", "<br>")
-              // Changes line_color according to thermal slowdown status for nvidia cards
+              // Changes line_color according to thermal slowdown status on nvidia cards
               if (e.data.includes("SW Thermal Slowdown")) {
                 if (e.data.includes(": Active")) {
                   line_color = "\033[0;31m" // Red
@@ -1541,7 +1546,7 @@ status)
 *)
   # Start if not running
   if [ ! -f ${SERVER_PGID} ]; then
-    sh $0 start
+    setsid sh $0 start
   fi
 esac
 
