@@ -1416,7 +1416,7 @@ cat <<-LUA > "${HTTPD_FILE}"
         ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
       })
     elseif resource == "/update" then
-      os.execute("sudo sh ${SERVER_FILE} update&")
+      os.execute("sudo sh ${SERVER_FILE} update")
       make_response({
         ["data"] = "Updating...",
         ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
@@ -1582,7 +1582,8 @@ update)
     wget $DEV_UPDATE_API
     cp /tmp/update/server.sh ${SERVER_FILE}
   fi
-  sh ${SERVER_FILE} restart
+  cd -
+  sh $0 restart
   ;;
 status)
   if [ -e ${SERVER_PGID} ]; then
