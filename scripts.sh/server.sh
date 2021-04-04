@@ -971,6 +971,7 @@ cat <<-HTML > "${INDEX_FILE}"
             })
             .then(function (text) {
               alert("Update request executed! " + text)
+              location.reload()
             })
             .catch(function (error) {
               alert("Error comunicating with local server, update probably in progress. " + error)
