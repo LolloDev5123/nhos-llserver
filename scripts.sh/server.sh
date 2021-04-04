@@ -949,9 +949,13 @@ cat <<-HTML > "${INDEX_FILE}"
       }
 
       // Gets current version and compares it with the latest version
+      var currentVersion
       fetch("${UPDATE_API}")
         .then(function (response) { return response.json() }).then(function (json) {
-          let currentVersion = json["tag_name"]
+          currentVersion = json["tag_name"]
+          if ("${DEV_UPDATE_API}" !== "") {
+            currentVersion = "development"
+          }
           if (version.textContent !== currentVersion) {
             version.insertAdjacentHTML("beforeend", " <a href=\"#\" onclick=\"update(event)\">(Update to " + currentVersion + ")</a>")
           }
@@ -959,7 +963,7 @@ cat <<-HTML > "${INDEX_FILE}"
 
       window.update = function(e) {
         e.preventDefault()
-        if (confirm("Are you sure to update to the latest version?")) {
+        if (confirm("Are you sure to update to " + currentVersion + "?")) {
           fetch(rig.url + "/update", { method: "POST" })
             .then(function (response) {
               return response.text()
