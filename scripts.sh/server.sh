@@ -1576,7 +1576,7 @@ update)
     cp /tmp/update/scripts.sh/server.sh ${SERVER_FILE}
   else
     wget $DEV_UPDATE_API
-    cp /tmp/server.sh ${SERVER_FILE}
+    cp /tmp/update/server.sh ${SERVER_FILE}
   fi
   cd -
   sh $0 restart
