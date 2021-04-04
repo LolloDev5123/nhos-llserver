@@ -1582,6 +1582,7 @@ update)
     wget -O /tmp/update/scripts.sh/server.sh ${DEV_UPDATE_API}
   fi
   cp /tmp/update/scripts.sh/server.sh ${SERVER_FILEPATH}
+  sleep 1
   sh $0 restart
   ;;
 status)
