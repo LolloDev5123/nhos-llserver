@@ -1582,8 +1582,7 @@ update)
     wget $DEV_UPDATE_API
     cp /tmp/update/server.sh ${SERVER_FILE}
   fi
-  cd -
-  sh $0 restart
+  sh ${SERVER_FILE} restart
   ;;
 status)
   if [ -e ${SERVER_PGID} ]; then
