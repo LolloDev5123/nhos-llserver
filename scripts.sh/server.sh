@@ -876,8 +876,14 @@ cat <<-HTML > "${INDEX_FILE}"
         rigsList.style.display = "none"
         rigsListTitle.style.display = "none"
 
+        loadLogs(timeout)
+      }
+
+      function loadLogs(timeout) {
         // Scroll down to see latest logs
-        window.scrollTo(0, document.body.scrollHeight)
+        if (autoscroll.checked) {
+          window.scrollTo(0, document.body.scrollHeight)
+        }
 
         let dots, loading, line_color
         if (eventSource) {
@@ -887,15 +893,15 @@ cat <<-HTML > "${INDEX_FILE}"
           loading = setTimeout(function() {
             logs.insertAdjacentHTML("beforeend", "<br>")
             logs.insertAdjacentText("beforeend", "Loading")
-            window.scrollTo(0, document.body.scrollHeight)
+            if (autoscroll.checked) {
+              window.scrollTo(0, document.body.scrollHeight)
+            }
             dots = setInterval(function () {
               logs.insertAdjacentText("beforeend", ".")
             }, 500)
           }, 1000)
         }
 
-        // Scroll down to see latest logs
-        window.scrollTo(0, document.body.scrollHeight)
 
         // Add optional timeout before request logs files
         setTimeout(function() {
@@ -1137,6 +1143,19 @@ cat <<-HTML > "${INDEX_FILE}"
             rigAddGui(ip)
           })
         })
+
+      // Load logs only if page is visible
+      document.addEventListener("visibilitychange", function() {
+        if (document.hidden) {
+          if (eventSource) {
+            eventSource.close()
+          }
+        } else {
+          if (logs.style.display != "none") {
+            loadLogs()
+          }
+        }
+      })
 
       // Check if a rig is open or show full rigs list
       var rigSelectedIp = localStorage.getItem("rigSelectedIp")
