@@ -28,7 +28,8 @@ NHOS_DEVICE_SETTINGS_FILE="${NHOS_DATA_DIR}/nhm/configs/${DEVICE_SETTINGS_JSON}"
 CONFIGURATION_TXT='configuration.txt'
 SERVER_PGID='/var/run/server.pgid'
 TRUSTED_HOSTS_FILE="${NHOS_DATA_DIR}/trusted-hosts.txt"
-SERVER_FILE="${NHOS_DATA_DIR}/scripts.sh/server.sh"
+SERVER_FILE=`basename -- "$0"`
+SERVER_FILEPATH="${NHOS_DATA_DIR}/scripts.sh/${SERVER_FILE}"
 UPDATE_API='https://api.github.com/repos/totakaro/nhos-llserver/releases/latest'
 # Only for development, empty on production
 DEV_UPDATE_API='https://raw.githubusercontent.com/totakaro/nhos-llserver/v1.0.6/scripts.sh/server.sh'
@@ -1416,7 +1417,7 @@ cat <<-LUA > "${HTTPD_FILE}"
         ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
       })
     elseif resource == "/update" then
-      os.execute("sudo sh ${SERVER_FILE} update")
+      os.execute("sudo sh ${SERVER_FILEPATH} update&")
       make_response({
         ["data"] = "Updating...",
         ["headers"] = {["Content-type"] = "text/plain; charset=utf-8", ["Access-Control-Allow-Origin"] = "*", ["Cache-Control"] = "no-cache",  ["X-Content-Type-Options"] = "nosniff"},
@@ -1572,17 +1573,16 @@ restart)
   ;;
 update)
   rm -rf /tmp/update
-  mkdir -p /tmp/update
-  cd /tmp/update
+  mkdir /tmp/update
   if [ -z "$DEV_UPDATE_API" ]; then
-    wget -O update.tar.gz `curl -s ${UPDATE_API} | jq -r '.tarball_url'`
-    tar -xzvf update.tar.gz --strip-components=1
-    cp /tmp/update/scripts.sh/server.sh ${SERVER_FILE}
+    wget -O /tmp/update/update.tar.gz `curl -s ${UPDATE_API} | jq -r '.tarball_url'`
+    tar -C /tmp/update -xzvf /tmp/update/update.tar.gz --strip-components=1
   else
-    wget $DEV_UPDATE_API
-    cp /tmp/update/server.sh ${SERVER_FILE}
+    mkdir /tmp/update/scripts.sh
+    wget -O /tmp/update/scripts.sh/server.sh ${DEV_UPDATE_API}
   fi
-  sh ${SERVER_FILE} restart
+  cp /tmp/update/scripts.sh/server.sh ${SERVER_FILEPATH}
+  sh $0 restart
   ;;
 status)
   if [ -e ${SERVER_PGID} ]; then
