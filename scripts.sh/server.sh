@@ -1576,11 +1576,11 @@ update)
   rm -rf /tmp/update
   mkdir /tmp/update
   if [ -z "$DEV_UPDATE_API" ]; then
-    wget --no-check-certificate --no-cache --no-cookies --no-http-keep-alive -O /tmp/update/update.tar.gz `curl -s ${UPDATE_API} | jq -r '.tarball_url'`
+    wget --header 'Cache-Control: no-cache' -O /tmp/update/update.tar.gz `curl -s ${UPDATE_API}?$(date +%s) | jq -r '.tarball_url'`
     tar -C /tmp/update -xzvf /tmp/update/update.tar.gz --strip-components=1
   else
     mkdir /tmp/update/scripts.sh
-    wget --no-check-certificate --no-cache --no-cookies --no-http-keep-alive -O /tmp/update/scripts.sh/server.sh ${DEV_UPDATE_API}
+    wget --header 'Cache-Control: no-cache' -O /tmp/update/scripts.sh/server.sh "${DEV_UPDATE_API}?$(date +%s)"
   fi
   cp -v /tmp/update/scripts.sh/server.sh "${SERVER_FILEPATH}"
   setsid sh $0 restart
