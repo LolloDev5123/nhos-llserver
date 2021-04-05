@@ -892,22 +892,22 @@ cat <<-HTML > "${INDEX_FILE}"
           window.scrollTo(0, document.body.scrollHeight)
         }
 
+        // Clear previous events
         if (eventSource) {
-          // Clear previous events
           eventSource.close()
-          // Loading dots
-          loading.push(setTimeout(function() {
-            logs.insertAdjacentHTML("beforeend", "<br>")
-            logs.insertAdjacentText("beforeend", "Loading")
-            if (autoscroll.checked) {
-              window.scrollTo(0, document.body.scrollHeight)
-            }
-            dots.push(setInterval(function () {
-              logs.insertAdjacentText("beforeend", ".")
-            }, 500))
-          }, 1000))
         }
 
+        // Loading dots
+        loading.push(setTimeout(function() {
+          logs.insertAdjacentHTML("beforeend", "<br>")
+          logs.insertAdjacentText("beforeend", "Loading")
+          if (autoscroll.checked) {
+            window.scrollTo(0, document.body.scrollHeight)
+          }
+          dots.push(setInterval(function () {
+            logs.insertAdjacentText("beforeend", ".")
+          }, 500))
+        }, 1000))
 
         // Add optional timeout before request logs files
         setTimeout(function() {
