@@ -32,7 +32,7 @@ SERVER_FILE=`basename -- "$0"`
 SERVER_FILEPATH="${NHOS_DATA_DIR}/scripts.sh/${SERVER_FILE}"
 UPDATE_API='https://api.github.com/repos/totakaro/nhos-llserver/releases/latest'
 # Only for development, empty on production
-DEV_UPDATE_API=''
+DEV_UPDATE_API='https://raw.githubusercontent.com/totakaro/nhos-llserver/v1.0.6/scripts.sh/server.sh'
 
 # Main page index.html
 cat <<-HTML > "${INDEX_FILE}"
