@@ -1175,17 +1175,26 @@ cat <<-HTML > "${INDEX_FILE}"
           })
         })
 
-      // Load logs only if page is visible
+      // Stop logs when hidden more than ten seconds. Show them again when visible
+      var visibilityTimers = []
       document.addEventListener("visibilitychange", function() {
-        if (document.hidden) {
-          if (eventSource) {
-            eventSource.close()
+        visibilityTimers.forEach(function (timer) {
+          clearTimeout(timer)
+        })
+        visibilityTimers.push(setTimeout(function() {
+          if (document.hidden) {
+            if (eventSource) {
+              eventSource.close()
+              eventSource = undefined
+            }
+          } else {
+            if (logs.style.display != "none") {
+              if (!eventSource) {
+                loadLogs()
+              }
+            }
           }
-        } else {
-          if (logs.style.display != "none") {
-            loadLogs()
-          }
-        }
+        }, 10000))
       })
 
       // Check if a rig is open or show full rigs list
