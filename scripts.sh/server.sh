@@ -486,7 +486,7 @@ cat <<-HTML > "${INDEX_FILE}"
               number0 = document.createElement("input")
               number1 = document.createElement("input")
               number2 = document.createElement("input")
-              range0.max = 100
+              range0.max = 150
               range0.min = 0
               range0.step = 1
               range1.max = 5000
