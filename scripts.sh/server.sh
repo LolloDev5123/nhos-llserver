@@ -1182,19 +1182,14 @@ cat <<-HTML > "${INDEX_FILE}"
           clearTimeout(timer)
         })
         visibilityTimers.push(setTimeout(function() {
-          if (document.hidden) {
-            if (eventSource) {
-              eventSource.close()
-              eventSource = undefined
-            }
-          } else {
-            if (logs.style.display != "none") {
-              if (!eventSource) {
-                loadLogs()
-              }
-            }
+          if (document.hidden && eventSource) {
+            eventSource.close()
+            eventSource = undefined
           }
-        }, 10000))
+        }, 60000))
+        if (!document.hidden && logs.style.display != "none" && !eventSource)
+          loadLogs()
+        }
       })
 
       // Check if a rig is open or show full rigs list
