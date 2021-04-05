@@ -1187,7 +1187,7 @@ cat <<-HTML > "${INDEX_FILE}"
             eventSource = undefined
           }
         }, 60000))
-        if (!document.hidden && logs.style.display != "none" && !eventSource)
+        if (!document.hidden && logs.style.display != "none" && !eventSource) {
           loadLogs()
         }
       })
