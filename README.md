@@ -8,9 +8,8 @@ Simple server in one single file to manage your NHOS rig :rocket:
 
 How to get the script running on NHOS:
 
-1. Open `server.sh` with a [compatible text editor](https://github.com/nicehash/NHOS/blob/master/nhos_configuration.md#what-you-will-need), and edit `ALLOW` variable Ex. `ALLOW="192.168.0.0/24"` to allow access only from IPs in your local network, check more here: https://nmap.org/ncat/guide/ncat-access.html
-2. Save the `server.sh` script on `/mnt/nhos/scripts.sh/` directory. Check how in official NHOS documentation [here](https://github.com/nicehash/NHOS/blob/master/nhos_boot_scripts.md).
-3. Access to your local NHOS rig IP using your browser Ex. http://192.168.0.42
+1. Save the `server.sh` script on `/mnt/nhos/scripts.sh/` directory. Check how in official NHOS documentation [here](https://github.com/nicehash/NHOS/blob/master/nhos_boot_scripts.md).
+2. Access to your local NHOS rig IP using your browser Ex. http://192.168.0.42
 
 ## Features
 
