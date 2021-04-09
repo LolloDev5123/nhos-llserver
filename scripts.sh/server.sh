@@ -418,9 +418,15 @@ cat <<-HTML > "${INDEX_FILE}"
         location.reload()
       })
 
-      var eventSource, port=":$PORT"
+      var eventSource, port = ""
+
       var rig = {
         url: ""
+      }
+
+      // Make sure to use the right local port throught the router when no VPN
+      if ("$PORT" !== "80") {
+        port = ":$PORT"
       }
 
       var rigs = localStorage.getItem("rigs")
