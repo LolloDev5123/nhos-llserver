@@ -15,6 +15,7 @@ fi
 
 # Script vars
 VERSION='1.0.6'
+PORT=80
 INDEX_FILE='/tmp/index.html'
 HTTPD_FILE='/tmp/httpd.lua'
 RIGS_JSON='rigs.json'
@@ -417,7 +418,7 @@ cat <<-HTML > "${INDEX_FILE}"
         location.reload()
       })
 
-      var eventSource
+      var eventSource, port=":$PORT"
       var rig = {
         url: ""
       }
@@ -829,10 +830,10 @@ cat <<-HTML > "${INDEX_FILE}"
 
       // Open a specific rig and get basic rig information
       function rigOpen(ip) {
-        fetch(protocol + ip + "/${NHM_TXT}")
+        fetch(protocol + ip + port + "/${NHM_TXT}")
           .then(function (response) {
               if (response.ok) {
-                rig.url = protocol + ip
+                rig.url = protocol + ip + port
                 localStorage.setItem("rigSelectedIp", ip.trim())
                 rigInfo.textContent = ""
                 rigOpenSetup()
@@ -1035,7 +1036,7 @@ cat <<-HTML > "${INDEX_FILE}"
         rigItem.classList.add("offline")
         rigOpenButton.classList.add("disabled")
         rigOpenButton.disabled = true
-        fetch(protocol + ip + "/${NHM_TXT}")
+        fetch(protocol + ip + port + "/${NHM_TXT}")
           .then(function (response) {
             if (response.ok) {
               return response.text()
@@ -1088,7 +1089,7 @@ cat <<-HTML > "${INDEX_FILE}"
         rigItemActions.appendChild(rigRemoveButton)
         rigItem.appendChild(rigItemActions)
         rigsList.appendChild(rigItem)
-        fetch(protocol + window.location.host + "/${RIGS_JSON}", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
+        fetch(protocol + window.location.host + port + "/${RIGS_JSON}", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
         localStorage.setItem("rigs", JSON.stringify(rigs))
         rigRemoveButton.addEventListener("click", function() {
           if(confirm("Are you sure to remove this rig from the list?")) {
@@ -1096,7 +1097,7 @@ cat <<-HTML > "${INDEX_FILE}"
             rigs.list = rigs.list.filter(function(item) {
                 return item !== ip
             })
-            fetch(protocol + window.location.host + "/${RIGS_JSON}", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
+            fetch(protocol + window.location.host + port + "/${RIGS_JSON}", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
             localStorage.setItem("rigs", JSON.stringify(rigs))
           }
         })
@@ -1157,7 +1158,7 @@ cat <<-HTML > "${INDEX_FILE}"
       })
 
       // Check rigs
-      fetch(protocol + window.location.host + "/${RIGS_JSON}")
+      fetch(protocol + window.location.host + port + "/${RIGS_JSON}")
         .then(function(response) {
             return response.json()
         })
@@ -1533,9 +1534,9 @@ server_listen()
 {
   # Add support for trusted hosts access https://nmap.org/ncat/guide/ncat-access.html
   if [ -f ${TRUSTED_HOSTS_FILE} ]; then
-    ncat -n4 -lk -p 80 --allowfile ${TRUSTED_HOSTS_FILE} --lua-exec ${HTTPD_FILE}&
+    ncat -n4 -lk -p $PORT --allowfile ${TRUSTED_HOSTS_FILE} --lua-exec ${HTTPD_FILE}&
   else
-    ncat -n4 -lk -p 80 --lua-exec ${HTTPD_FILE}&
+    ncat -n4 -lk -p $PORT --lua-exec ${HTTPD_FILE}&
   fi
   # Get the current group id
   ps -o pgid,pid | grep $! | awk '{printf $1}' > ${SERVER_PGID}
