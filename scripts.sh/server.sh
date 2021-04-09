@@ -1557,7 +1557,7 @@ start)
     exit 0
   fi
   # Check if NHOS logs are available to execute the server
-  while sleep 1; do
+  while sleep 5; do
     if [ -d ${NHOS_LOG_NHM_DIR} ]; then
       ${RIGS}
       ${RIG_INFO}
