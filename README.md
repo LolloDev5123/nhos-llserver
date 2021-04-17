@@ -8,7 +8,9 @@ Simple server in one single file to manage your NHOS rig :rocket:
 
 How to get the script running on NHOS:
 
-1. Save the `server.sh` script on `/mnt/nhos/scripts.sh/` directory. Check how in official NHOS documentation [here](https://github.com/nicehash/NHOS/blob/master/nhos_boot_scripts.md).
+1. Save the `server.sh` script on `/mnt/nhos/scripts.sh/` directory and make sure it uses Unix (LF) format. Check how in official NHOS documentation [here](https://github.com/nicehash/NHOS/blob/master/nhos_boot_scripts.md).
+
+![image](https://user-images.githubusercontent.com/30659361/115125091-9b515000-9f8b-11eb-9948-89c75c08aede.png)
 
 ![image](https://user-images.githubusercontent.com/30659361/115119971-a054d600-9f70-11eb-96cf-9d9f5ce72d74.png)
 
