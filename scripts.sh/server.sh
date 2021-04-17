@@ -4,6 +4,8 @@
 # By @totakaro 2021
 # MIT License
 
+# WARNING: make sure to save this file as Unix (LF) format, see README
+
 # Check root https://stackoverflow.com/a/18216122
 if [ `id -u` -ne 0 ]; then
   echo "Please run as root"
@@ -14,7 +16,7 @@ fi
 . /etc/init.d/nhos-functions
 
 # Script vars
-VERSION='1.0.6'
+VERSION='1.0.7'
 PORT=80
 INDEX_FILE='/tmp/index.html'
 HTTPD_FILE='/tmp/httpd.lua'
