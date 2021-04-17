@@ -9,7 +9,20 @@ Simple server in one single file to manage your NHOS rig :rocket:
 How to get the script running on NHOS:
 
 1. Save the `server.sh` script on `/mnt/nhos/scripts.sh/` directory. Check how in official NHOS documentation [here](https://github.com/nicehash/NHOS/blob/master/nhos_boot_scripts.md).
-2. Access to your local NHOS rig IP using your browser Ex. http://192.168.0.42
+
+![image](https://user-images.githubusercontent.com/30659361/115119971-a054d600-9f70-11eb-96cf-9d9f5ce72d74.png)
+
+![image](https://user-images.githubusercontent.com/30659361/115120003-bd89a480-9f70-11eb-9dd1-ac4517478e53.png)
+
+![image](https://user-images.githubusercontent.com/30659361/115120026-d3976500-9f70-11eb-9136-6c192dbc9d11.png)
+
+2. Put the USB Pendribe back to your rig and access to your local NHOS rig IP using your browser. You should  something like this:
+
+![image](https://user-images.githubusercontent.com/30659361/115120118-62a47d00-9f71-11eb-96b7-9e07d7779932.png)
+
+3. Click on Open to see your rig miner logs
+
+![image](https://user-images.githubusercontent.com/30659361/115120357-a3e95c80-9f72-11eb-9784-67a69e77f13f.png)
 
 ## Features
 
