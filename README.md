@@ -16,7 +16,7 @@ How to get the script running on NHOS:
 
 ![image](https://user-images.githubusercontent.com/30659361/115120026-d3976500-9f70-11eb-9136-6c192dbc9d11.png)
 
-2. Put the USB Pendribe back to your rig and access to your local NHOS rig IP using your browser. You should  something like this:
+2. Put the USB Pendrive back to your rig and access to your local NHOS rig IP using your browser. You should  something like this:
 
 ![image](https://user-images.githubusercontent.com/30659361/115120118-62a47d00-9f71-11eb-96b7-9e07d7779932.png)
 
