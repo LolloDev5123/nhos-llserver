@@ -60,9 +60,11 @@ For more information about NHOS check official sources: https://static.nicehash.
 - Add more nice CSS stylesheets :sparkles:
 - Keep it simple in the process :100:
 
-## Donate
+## Contribute
 
-Feel free to collaborate with code or donate a few Satoshi using your Lighning Wallet ⚡ :smile:
+So Many Thanks to the Miner community! very good feedback, specially to Discord users on #nicehash-os 🌕
+
+Also feel free to collaborate with code or donate a few Satoshi using your Lighning Wallet ⚡ :smile:
 
 [![sathoshis](https://img.shields.io/badge/Donate-Satoshi%20%E2%9A%A1-blueviolet)](https://totakaro.github.io/donate)
 
