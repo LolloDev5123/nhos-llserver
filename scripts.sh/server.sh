@@ -35,10 +35,10 @@ SERVER_FILE=`basename -- "$0"`
 SERVER_FILEPATH="${NHOS_DATA_DIR}/scripts.sh/${SERVER_FILE}"
 UPDATE_API='https://api.github.com/repos/totakaro/nhos-llserver/releases/latest'
 # Only for development, empty on production
-DEV_UPDATE_API='https://raw.githubusercontent.com/totakaro/nhos-llserver/v1.0.8/scripts.sh/server.sh'
+DEV_UPDATE_API=''
 
 # Main page index.html
-cat <<-'HTML' > /tmp/index.html
+cat <<-HTML > "${INDEX_FILE}"
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -352,7 +352,7 @@ cat <<-'HTML' > /tmp/index.html
         </g>
       </g>
       </svg>
-      <sup><small><span id="version"><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank">v1.0.8</a></span> ⚡ <a href="https://totakaro.github.io/donate" target="_blank">Donate</a></small></small></sup>
+      <sup><small><span id="version"><a href="https://github.com/totakaro/nhos-llserver/releases" target="_blank">v${VERSION}</a></span>⚡ <a href="https://totakaro.github.io/donate" target="_blank">Donate</a></small></small></sup>
       <button id="rigs-all">Rigs</button> <button id="rig-add">Add rig</button>
       <button id="top">Go Top</button>
       <button id="bottom">Go Bottom</button>
@@ -427,8 +427,8 @@ cat <<-'HTML' > /tmp/index.html
       }
 
       // Make sure to use the right local port throught the router when no VPN
-      if ("80" !== "80") {
-        port = ":80"
+      if ("$PORT" !== "80") {
+        port = ":$PORT"
       }
 
       var rigs = localStorage.getItem("rigs")
@@ -468,11 +468,11 @@ cat <<-'HTML' > /tmp/index.html
         }
       })
 
-      // All inputs from device_settings.json
+      // All inputs from ${DEVICE_SETTINGS_JSON}
       function guiOCSetup(element) {
         var json = JSON.parse(element.value)
         if (json["detected_devices"].length === 0) {
-          ocSettingsGui.insertAdjacentText("beforeend", "No devices found, wait for NHOS to generate device_settings.json and try reopen OC settings again.")
+          ocSettingsGui.insertAdjacentText("beforeend", "No devices found, wait for NHOS to generate ${DEVICE_SETTINGS_JSON} and try reopen OC settings again.")
           return
         }
         let counter = 0
@@ -616,7 +616,7 @@ cat <<-'HTML' > /tmp/index.html
         })
       }
 
-      // All inputs from configuration.txt
+      // All inputs from ${CONFIGURATION_TXT}
       function guiConfig(element) {
         var json = JSON.parse(element.value), fanDefaults
         if (json["fan_control"] === undefined) {
@@ -682,10 +682,10 @@ cat <<-'HTML' > /tmp/index.html
         })
       }
 
-      // Open configuration.txt
+      // Open ${CONFIGURATION_TXT}
       config.addEventListener("click", function () {
         if (configTxt.style.display === "none") {
-          fetch(rig.url + "/configuration.txt")
+          fetch(rig.url + "/${CONFIGURATION_TXT}")
             .then(function (response) {
               return response.json()
             })
@@ -716,18 +716,18 @@ cat <<-'HTML' > /tmp/index.html
         }
       })
 
-      // Save configuration.txt
+      // Save ${CONFIGURATION_TXT}
       configSave.addEventListener("click", function () {
         try {
           JSON.parse(configTxt.value)
         } catch (err) {
-          alert("Error in your configuration.txt, please check again: " + err)
+          alert("Error in your ${CONFIGURATION_TXT}, please check again: " + err)
           return
         }
         if (!confirm("Please backup your configuration before save it.\nAre you sure to continue?")) {
           return
         }
-        fetch(rig.url + "/configuration.txt", { method: "POST", body: configTxt.value + "\n" })
+        fetch(rig.url + "/${CONFIGURATION_TXT}", { method: "POST", body: configTxt.value + "\n" })
           .then(function (response) {
             return response.text()
           })
@@ -736,7 +736,7 @@ cat <<-'HTML' > /tmp/index.html
             rigOpenSetup()
           })
           .catch(function (error) {
-            alert("Error saving configuration.txt in local server, reboot probably in progress. " + error)
+            alert("Error saving ${CONFIGURATION_TXT} in local server, reboot probably in progress. " + error)
           })
       })
 
@@ -781,7 +781,7 @@ cat <<-'HTML' > /tmp/index.html
           if (!confirm("CAUTION:\nOC can damage your hardware!\nEdit only if you know what you are doing!\nDo you wanna continue?")) {
             return
           }
-          fetch(rig.url + "/device_settings.json")
+          fetch(rig.url + "/${DEVICE_SETTINGS_JSON}")
             .then(function (response) {
               return response.json()
             })
@@ -823,7 +823,7 @@ cat <<-'HTML' > /tmp/index.html
         if (!confirm("Please backup your OC settings before save them.\nAre you sure to continue?")) {
           return
         }
-        fetch(rig.url + "/device_settings.json", { method: "POST", body: ocSettings.value + "\n" })
+        fetch(rig.url + "/${DEVICE_SETTINGS_JSON}", { method: "POST", body: ocSettings.value + "\n" })
           .then(function (response) {
             return response.text()
           })
@@ -838,7 +838,7 @@ cat <<-'HTML' > /tmp/index.html
 
       // Open a specific rig and get basic rig information
       function rigOpen(ip) {
-        fetch(protocol + ip + port + "/nhm.txt")
+        fetch(protocol + ip + port + "/${NHM_TXT}")
           .then(function (response) {
               if (response.ok) {
                 rig.url = protocol + ip + port
@@ -948,7 +948,8 @@ cat <<-'HTML' > /tmp/index.html
               } else {
                 line_color = "\033[0m" // Reset no color
               }
-              logs.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(line_color + e.data + "\033[0m"))
+              let logData = e.data.replace("SW Thermal Slowdown", line_color + "SW Thermal Slowdown")
+              logs.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(logData + "\033[0m"))
               // AutoScroll if enabled
               if (autoscroll.checked) {
                 window.scrollTo(0, document.body.scrollHeight)
@@ -960,10 +961,10 @@ cat <<-'HTML' > /tmp/index.html
 
       // Gets current version and compares it with the latest version
       var currentVersion
-      fetch("https://api.github.com/repos/totakaro/nhos-llserver/releases/latest")
+      fetch("${UPDATE_API}")
         .then(function (response) { return response.json() }).then(function (json) {
           currentVersion = json["tag_name"]
-          if ("" !== "") {
+          if ("${DEV_UPDATE_API}" !== "") {
             currentVersion = "development"
           }
           if (version.textContent !== currentVersion) {
@@ -1044,7 +1045,7 @@ cat <<-'HTML' > /tmp/index.html
         rigItem.classList.add("offline")
         rigOpenButton.classList.add("disabled")
         rigOpenButton.disabled = true
-        fetch(protocol + ip + port + "/nhm.txt")
+        fetch(protocol + ip + port + "/${NHM_TXT}")
           .then(function (response) {
             if (response.ok) {
               return response.text()
@@ -1097,7 +1098,7 @@ cat <<-'HTML' > /tmp/index.html
         rigItemActions.appendChild(rigRemoveButton)
         rigItem.appendChild(rigItemActions)
         rigsList.appendChild(rigItem)
-        fetch(protocol + window.location.host + port + "/rigs.json", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
+        fetch(protocol + window.location.host + port + "/${RIGS_JSON}", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
         localStorage.setItem("rigs", JSON.stringify(rigs))
         rigRemoveButton.addEventListener("click", function() {
           if(confirm("Are you sure to remove this rig from the list?")) {
@@ -1105,7 +1106,7 @@ cat <<-'HTML' > /tmp/index.html
             rigs.list = rigs.list.filter(function(item) {
                 return item !== ip
             })
-            fetch(protocol + window.location.host + port + "/rigs.json", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
+            fetch(protocol + window.location.host + port + "/${RIGS_JSON}", { method: "POST", body: JSON.stringify(rigs, false, "\t") + "\n"})
             localStorage.setItem("rigs", JSON.stringify(rigs))
           }
         })
@@ -1166,7 +1167,7 @@ cat <<-'HTML' > /tmp/index.html
       })
 
       // Check rigs
-      fetch(protocol + window.location.host + port + "/rigs.json")
+      fetch(protocol + window.location.host + port + "/${RIGS_JSON}")
         .then(function(response) {
             return response.json()
         })
