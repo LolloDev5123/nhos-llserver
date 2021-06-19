@@ -16,7 +16,7 @@ fi
 . /etc/init.d/nhos-functions
 
 # Script vars
-VERSION='1.0.7'
+VERSION='1.0.8'
 PORT=80
 INDEX_FILE='/tmp/index.html'
 HTTPD_FILE='/tmp/httpd.lua'
@@ -948,7 +948,8 @@ cat <<-HTML > "${INDEX_FILE}"
               } else {
                 line_color = "\033[0m" // Reset no color
               }
-              logs.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(line_color + e.data + "\033[0m"))
+              let logData = e.data.replace("SW Thermal Slowdown", line_color + "SW Thermal Slowdown")
+              logs.insertAdjacentHTML("beforeend", ansi_up.ansi_to_html(logData + "\033[0m"))
               // AutoScroll if enabled
               if (autoscroll.checked) {
                 window.scrollTo(0, document.body.scrollHeight)
